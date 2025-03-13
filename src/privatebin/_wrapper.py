@@ -131,6 +131,9 @@ def create(  # noqa: PLR0913
     Create a paste on a custom PrivateBin server with Markdown formatting and burn-after-reading:
 
     ```python
+    import privatebin
+    from privatebin import Formatter
+
     md_paste_url = privatebin.create(
         text="# Markdown Content\\n\\nThis is **markdown** formatted text.",
         server="https://myprivatebin.example.org/",
@@ -143,13 +146,17 @@ def create(  # noqa: PLR0913
     Create a password-protected paste with an attachment:
 
     ```python
-    attachment = privatebin.Attachment.from_file("path/to/your/file.txt")
+    import privatebin
+    from privatebin import Attachment
+
+    attachment = Attachment.from_file("path/to/your/file.txt")
 
     password_paste_url = privatebin.create(
         text="This paste has a password and an attachment.",
         password="supersecret",
         attachment=attachment
     )
+    
     print(f"Password-protected paste URL: {password_paste_url}")
     ```
 
