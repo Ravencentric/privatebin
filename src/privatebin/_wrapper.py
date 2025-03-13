@@ -156,7 +156,7 @@ def create(  # noqa: PLR0913
         password="supersecret",
         attachment=attachment
     )
-    
+
     print(f"Password-protected paste URL: {password_paste_url}")
     ```
 

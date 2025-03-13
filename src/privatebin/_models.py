@@ -1,19 +1,22 @@
 from __future__ import annotations
 
 import base64
-import os
 import re
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 from urllib.parse import urljoin
 
 from pydantic import Base64Bytes, BaseModel, ConfigDict, field_validator
-from typing_extensions import Self
 
 from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_json
+
+if TYPE_CHECKING:
+    from os import PathLike
+
+    from typing_extensions import Self
 
 
 class FrozenModel(BaseModel):
@@ -352,7 +355,7 @@ class Attachment(FrozenModel):
     """The name of the attachment."""
 
     @classmethod
-    def from_file(cls, file: str | os.PathLike[str], *, name: str | None = None) -> Self:
+    def from_file(cls, file: str | PathLike[str], *, name: str | None = None) -> Self:
         """
         Create an `Attachment` instance from a file path.
 
@@ -360,7 +363,7 @@ class Attachment(FrozenModel):
 
         Parameters
         ----------
-        file : str | os.PathLike[str]
+        file : str | PathLike[str]
             Path to the file from which to create the attachment.
         name : str | None, optional
             The desired name for the attachment. If `None`, the filename from `file` is used.

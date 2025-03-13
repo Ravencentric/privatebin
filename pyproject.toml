@@ -8,14 +8,14 @@ license = "MIT"
 requires-python = ">=3.10"
 keywords = ["paste", "privatebin", "pastebin"]
 classifiers = [
-  "Intended Audience :: Developers",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Typing :: Typed",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Typing :: Typed",
 ]
 dependencies = [
     "base58>=2.1.1",
@@ -66,8 +66,12 @@ extend-select = [
     "RET",  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
     "PL",   # https://docs.astral.sh/ruff/rules/#pylint-pl
     "FURB", # https://docs.astral.sh/ruff/rules/#refurb-furb
+    "TC",   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
 ]
 fixable = ["ALL"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel", "typing.NamedTuple"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/*" = ["D", "FBT", "PL"]
@@ -82,7 +86,13 @@ files = ["src/**/*.py", "tests/**/*.py"]
 enable_error_code = ["ignore-without-code"]
 
 [tool.pytest.ini_options]
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config", "--disable-socket"]
+addopts = [
+    "-ra",
+    "--showlocals",
+    "--strict-markers",
+    "--strict-config",
+    "--disable-socket",
+]
 filterwarnings = ["error"]
 log_cli_level = "info"
 testpaths = ["tests"]

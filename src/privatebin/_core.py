@@ -3,17 +3,19 @@ from __future__ import annotations
 import base64
 import json
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import base58
 import httpx
-from typing_extensions import Self
 
 from privatebin._crypto import decrypt, encrypt
 from privatebin._enums import Compression, Expiration, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._models import Attachment, AuthenticatedData, Paste, PasteJsonLD, PrivateBinUrl
 from privatebin._utils import Zlib, to_compact_json
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class PrivateBin:

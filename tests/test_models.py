@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import base64
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from privatebin import Attachment
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_attachment_from_file(tmp_path: Path) -> None:

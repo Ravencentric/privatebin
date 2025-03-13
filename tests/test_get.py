@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest_httpx import HTTPXMock
 
 from privatebin import Formatter, PrivateBin, PrivateBinError
+
+if TYPE_CHECKING:
+    from pytest_httpx import HTTPXMock
 
 
 def test_get(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:

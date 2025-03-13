@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest_httpx import HTTPXMock
 
 import privatebin
 from privatebin import PrivateBinUrl
+
+if TYPE_CHECKING:
+    from pytest_httpx import HTTPXMock
 
 
 @pytest.mark.parametrize(

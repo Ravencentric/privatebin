@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from pytest_httpx import HTTPXMock
 
 from privatebin import Attachment, PrivateBin, PrivateBinError
+
+if TYPE_CHECKING:
+    from pytest_httpx import HTTPXMock
 
 
 def test_create(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
