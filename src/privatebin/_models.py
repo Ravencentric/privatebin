@@ -8,12 +8,18 @@ from pathlib import Path
 from typing import Any, Literal, NamedTuple
 from urllib.parse import urljoin
 
-from pydantic import Base64Bytes, BaseModel, field_validator
+from pydantic import Base64Bytes, BaseModel, ConfigDict, field_validator
 from typing_extensions import Self
 
 from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_json
+
+
+class FrozenModel(BaseModel):
+    """Frozen model."""
+
+    model_config = ConfigDict(frozen=True)
 
 
 class CipherParameters(NamedTuple):
@@ -214,7 +220,7 @@ class AuthenticatedData(NamedTuple):
         return to_compact_json(self.to_tuple()).encode()
 
 
-class MetaData(BaseModel):
+class MetaData(FrozenModel):
     """Metadata received with a PrivateBin paste from the server."""
 
     time_to_live: timedelta | None = None
@@ -224,7 +230,7 @@ class MetaData(BaseModel):
     """
 
 
-class PasteJsonLD(BaseModel):
+class PasteJsonLD(FrozenModel):
     """
     Represents a paste GET response from the PrivateBin API (v2).
 
@@ -337,7 +343,7 @@ class PasteJsonLD(BaseModel):
         return value if value else MetaData()
 
 
-class Attachment(BaseModel):
+class Attachment(FrozenModel):
     """Represents an attachment with its content and name."""
 
     content: bytes
@@ -441,7 +447,7 @@ class Attachment(BaseModel):
         return f"data:{mimetype};base64,{encoded}"
 
 
-class Paste(BaseModel):
+class Paste(FrozenModel):
     """Represents a PrivateBin paste."""
 
     id: str
@@ -460,7 +466,7 @@ class Paste(BaseModel):
     """Time duration for which the paste is set to be stored, if any."""
 
 
-class PrivateBinUrl(BaseModel):
+class PrivateBinUrl(FrozenModel):
     """Represents a parsed PrivateBin URL, including its components and delete token."""
 
     server: str
@@ -480,7 +486,7 @@ class PrivateBinUrl(BaseModel):
         like `str(url)`, `repr(url)`, or f-strings (`f"{url}"`).
 
         -  `to_str()` returns the full, unmasked URL with the sensitive passphrase.
-        -  Implicit conversions (`str(url)`, etc.) return a masked URL for safety.
+        -  Implicit conversions (`__str__()`, etc.) return a masked URL for safety.
 
         Call `to_str()` when you explicitly need the full, working URL, for example, to:
 
@@ -497,11 +503,11 @@ class PrivateBinUrl(BaseModel):
         >>> url = PrivateBinUrl(server="https://example.privatebin.com/", id="pasteid", passphrase="secret", delete_token="deltoken")
         >>> url.to_str()
         'https://example.privatebin.com/?pasteid#secret'
-        >>> str(url)  # Implicit string conversion - masked URL
+        >>> str(url)  # String conversion - masked URL
         'https://example.privatebin.com/?pasteid#********'
-        >>> f"{url}"  # Implicit string conversion in f-string - masked URL
+        >>> f"{url}"  # String conversion in f-string - masked URL
         'https://example.privatebin.com/?pasteid#********'
-        >>> repr(url) # Implicit string conversion in repr - masked URL
+        >>> repr(url) # String conversion in repr - masked URL
         'https://example.privatebin.com/?pasteid#********'
 
         """
