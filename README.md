@@ -21,7 +21,7 @@ pip install privatebin
 
 ## Docs
 
-Checkout the [quick start page](https://privatebin.ravencentric.cc/quick-start/) and the [API reference](https://privatebin.ravencentric.cc/api-reference/parser/).
+Checkout the [quick start page](https://privatebin.ravencentric.cc/quick-start/) and the [API reference](https://privatebin.ravencentric.cc/api-reference/client/).
 
 ## License
 
