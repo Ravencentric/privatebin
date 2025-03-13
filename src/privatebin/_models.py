@@ -207,7 +207,7 @@ class AuthenticatedData(NamedTuple):
             int(self.burn_after_reading),
         )
 
-    def to_json(self) -> bytes:
+    def to_bytes(self) -> bytes:
         """
         Serialize to a JSON-encoded byte string.
 

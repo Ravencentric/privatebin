@@ -149,7 +149,7 @@ class PrivateBin:
         decrypted = AESGCM(key).decrypt(
             nonce=cipher_parameters.initialization_vector,
             data=paste.ct,
-            associated_data=paste.adata.to_json(),
+            associated_data=paste.adata.to_bytes(),
         )
 
         decompressed = Zlib(decrypted).decompress() if cipher_parameters.compression is Compression.ZLIB else decrypted
@@ -295,7 +295,7 @@ class PrivateBin:
         key = kdf.derive(passphrase + encoded_password)
 
         encrypted = AESGCM(key).encrypt(
-            nonce=initialization_vector, data=compressed_data, associated_data=adata.to_json()
+            nonce=initialization_vector, data=compressed_data, associated_data=adata.to_bytes()
         )
 
         payload = {
