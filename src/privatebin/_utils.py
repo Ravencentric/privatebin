@@ -105,7 +105,6 @@ def guess_mime_type(filename: str) -> str:
     ----------
     https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types#applicationoctet-stream
 
-
     """
     if sys.version_info >= (3, 13):
         guesser = mimetypes.guess_file_type
