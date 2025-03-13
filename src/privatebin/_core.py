@@ -7,11 +7,9 @@ from typing import Any
 
 import base58
 import httpx
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from typing_extensions import Self
 
+from privatebin._crypto import decrypt, encrypt
 from privatebin._enums import Compression, Expiration, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._models import Attachment, AuthenticatedData, Paste, PasteJsonLD, PrivateBinUrl
@@ -138,17 +136,13 @@ class PrivateBin:
         paste = PasteJsonLD.from_response(response)
         cipher_parameters = paste.adata.cipher_parameters
 
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
+        decrypted = decrypt(
+            data=paste.ct,
             length=cipher_parameters.key_size // 8,
             salt=cipher_parameters.salt,
             iterations=cipher_parameters.iterations,
-        )
-        key = kdf.derive(encoded_passphrase + encoded_password)
-
-        decrypted = AESGCM(key).decrypt(
-            nonce=cipher_parameters.initialization_vector,
-            data=paste.ct,
+            key_material=encoded_passphrase + encoded_password,
+            initialization_vector=cipher_parameters.initialization_vector,
             associated_data=paste.adata.to_bytes(),
         )
 
@@ -286,16 +280,14 @@ class PrivateBin:
             compresssion=compression,
         )
 
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
+        encrypted = encrypt(
+            data=compressed_data,
             length=PrivateBinEncryptionSetting.KEY_SIZE // 8,
             salt=salt,
             iterations=PrivateBinEncryptionSetting.ITERATIONS,
-        )
-        key = kdf.derive(passphrase + encoded_password)
-
-        encrypted = AESGCM(key).encrypt(
-            nonce=initialization_vector, data=compressed_data, associated_data=adata.to_bytes()
+            key_material=passphrase + encoded_password,
+            initialization_vector=initialization_vector,
+            associated_data=adata.to_bytes(),
         )
 
         payload = {

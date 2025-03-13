@@ -109,7 +109,7 @@ def guess_mime_type(filename: str) -> str:
     """
     if sys.version_info >= (3, 13):
         guesser = mimetypes.guess_file_type
-    else:  # pragma: no cover
+    else:
         guesser = mimetypes.guess_type
 
     mimetype, _ = guesser(filename)

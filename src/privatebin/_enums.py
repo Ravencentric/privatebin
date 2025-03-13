@@ -54,4 +54,4 @@ class PrivateBinEncryptionSetting(IntEnum):
     ITERATIONS = 1_000_000
     SALT_SIZE = 8  # Allowed: 8 (According to my own tests.)
     KEY_SIZE = 256  # Allowed: [128, 196, 256] (as per PrivateBin)
-    TAG_SIZE = 128  # Allowed: [32, 64, 96, 104, 112, 120, 128] (as per PrivateBin)
+    TAG_SIZE = 128  # Allowed: [64, 96, 104, 112, 120, 128] (as per PrivateBin)
