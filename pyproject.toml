@@ -47,7 +47,7 @@ dev = [
 
 
 [tool.ruff]
-line-length = 120
+line-length = 99
 
 [tool.ruff.lint]
 extend-select = [

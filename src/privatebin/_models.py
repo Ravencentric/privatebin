@@ -81,7 +81,13 @@ class CipherParameters(NamedTuple):
     """The compression algorithm used before encryption."""
 
     @classmethod
-    def new(cls, *, initialization_vector: bytes, salt: bytes, compression: Compression = Compression.ZLIB) -> Self:
+    def new(
+        cls,
+        *,
+        initialization_vector: bytes,
+        salt: bytes,
+        compression: Compression = Compression.ZLIB,
+    ) -> Self:
         """
         Create a new CipherParameters instance with default encryption settings.
 
@@ -201,7 +207,8 @@ class AuthenticatedData(NamedTuple):
 
         """
         cipher_parameters = [
-            base64.b64encode(param).decode() if isinstance(param, bytes) else param for param in self.cipher_parameters
+            base64.b64encode(param).decode() if isinstance(param, bytes) else param
+            for param in self.cipher_parameters
         ]
         return (
             tuple(cipher_parameters),

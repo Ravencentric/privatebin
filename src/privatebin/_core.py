@@ -148,7 +148,11 @@ class PrivateBin:
             associated_data=paste.adata.to_bytes(),
         )
 
-        decompressed = Zlib(decrypted).decompress() if cipher_parameters.compression is Compression.ZLIB else decrypted
+        decompressed = (
+            Zlib(decrypted).decompress()
+            if cipher_parameters.compression is Compression.ZLIB
+            else decrypted
+        )
 
         # The finalized object is a dictionary with 1 mandatory key (`paste`)
         # and two optional keys (`attachment` and `attachment_name`)
@@ -268,10 +272,13 @@ class PrivateBin:
         data: dict[str, str | bytes] = {"paste": text}
 
         if attachment:
-            data.update({"attachment": attachment.to_base64_data_url(), "attachment_name": attachment.name})
+            data["attachment"] = attachment.to_base64_data_url()
+            data["attachment_name"] = attachment.name
 
         encoded_data = to_compact_json(data).encode()
-        compressed_data = Zlib(encoded_data).compress() if compression is Compression.ZLIB else encoded_data
+        compressed_data = (
+            Zlib(encoded_data).compress() if compression is Compression.ZLIB else encoded_data
+        )
 
         adata = AuthenticatedData.new(
             initialization_vector=initialization_vector,
@@ -301,7 +308,9 @@ class PrivateBin:
 
         # Success: {"status": 0, "id": "blah", "url": "/?blah", "deletetoken": "blah"}
         # Failure: {"status": 1, "message": "[errormessage]"}
-        response: dict[str, Any] = self._client.post(url=self.server, json=payload).raise_for_status().json()
+        response: dict[str, Any] = (
+            self._client.post(url=self.server, json=payload).raise_for_status().json()
+        )
 
         if response["status"] != 0:
             msg = response.get("message", "Failed to create paste.")
@@ -347,7 +356,9 @@ class PrivateBin:
 
         # Success: {"status":0, "id": "[pasteID]"}
         # Failure: {"status":1, "message": "[errormessage]"}
-        response: dict[str, Any] = self._client.post(self.server, json=payload).raise_for_status().json()
+        response: dict[str, Any] = (
+            self._client.post(self.server, json=payload).raise_for_status().json()
+        )
 
         if response["status"] != 0:
             msg = response.get("message", "Failed to delete paste.")

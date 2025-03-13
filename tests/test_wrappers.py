@@ -39,7 +39,16 @@ def test_wrapper_get(url: str | PrivateBinUrl, httpx_mock: HTTPXMock) -> None:
             "id": "8ed8eb3736994f7d",
             "url": "/?8ed8eb3736994f7d=?8ed8eb3736994f7d",
             "adata": [
-                ["EhGlr6MDIrNHFyhdMAE6gA==", "wATfGNcSqjM=", 100000, 256, 128, "aes", "gcm", "zlib"],
+                [
+                    "EhGlr6MDIrNHFyhdMAE6gA==",
+                    "wATfGNcSqjM=",
+                    100000,
+                    256,
+                    128,
+                    "aes",
+                    "gcm",
+                    "zlib",
+                ],
                 "plaintext",
                 0,
                 0,
@@ -97,7 +106,9 @@ def test_wrapper_get_errors() -> None:
     ids=repr,
 )
 def test_wrapper_create(server: str | PrivateBinUrl, expected: str, httpx_mock: HTTPXMock) -> None:
-    httpx_mock.add_response(json={"status": 0, "id": "123456789", "url": "/?123456789", "deletetoken": "token"})
+    httpx_mock.add_response(
+        json={"status": 0, "id": "123456789", "url": "/?123456789", "deletetoken": "token"}
+    )
     url = privatebin.create("Hello World!", server=server)
     assert url.id == "123456789"
     assert url.server == expected
@@ -108,7 +119,9 @@ def test_wrapper_create_errors() -> None:
     with pytest.raises(TypeError, match="Parameter 'text' expected str, got object."):
         privatebin.create(object())  # type: ignore[arg-type]
 
-    with pytest.raises(TypeError, match="Parameter 'server' expected str or PrivateBinUrl, got None."):
+    with pytest.raises(
+        TypeError, match="Parameter 'server' expected str or PrivateBinUrl, got None."
+    ):
         privatebin.create("hello", server=None)  # type: ignore[arg-type]
 
 

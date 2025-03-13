@@ -45,11 +45,15 @@ def test_attachment_from_b64() -> None:
     original = b"Foo and bar"
     data = base64.b64encode(original).decode()
 
-    attachment = Attachment.from_base64_data_url(content=f"data:application/octet-stream;base64,{data}", name="baz")
+    attachment = Attachment.from_base64_data_url(
+        content=f"data:application/octet-stream;base64,{data}", name="baz"
+    )
     assert attachment.name == "baz"
     assert attachment.content == b"Foo and bar"
 
-    assert attachment.to_base64_data_url() == "data:application/octet-stream;base64,Rm9vIGFuZCBiYXI="
+    assert (
+        attachment.to_base64_data_url() == "data:application/octet-stream;base64,Rm9vIGFuZCBiYXI="
+    )
 
 
 def test_attachment_from_b64_error() -> None:

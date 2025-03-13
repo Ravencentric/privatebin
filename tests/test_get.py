@@ -18,7 +18,16 @@ def test_get(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
             "id": "8ed8eb3736994f7d",
             "url": "/?8ed8eb3736994f7d=?8ed8eb3736994f7d",
             "adata": [
-                ["EhGlr6MDIrNHFyhdMAE6gA==", "wATfGNcSqjM=", 100000, 256, 128, "aes", "gcm", "zlib"],
+                [
+                    "EhGlr6MDIrNHFyhdMAE6gA==",
+                    "wATfGNcSqjM=",
+                    100000,
+                    256,
+                    128,
+                    "aes",
+                    "gcm",
+                    "zlib",
+                ],
                 "plaintext",
                 0,
                 0,
@@ -33,7 +42,9 @@ def test_get(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
         }
     )
 
-    paste = pbin_client.get(id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH")
+    paste = pbin_client.get(
+        id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
+    )
     assert paste.text == "Hello World!"
 
 
@@ -44,7 +55,16 @@ def test_get_with_password(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> No
             "id": "fca0ed97b16b4fbc",
             "url": "/?fca0ed97b16b4fbc?fca0ed97b16b4fbc",
             "adata": [
-                ["AFwXgqZ86FAEV1/bGUariw==", "yNy9SmT13zE=", 100000, 256, 128, "aes", "gcm", "zlib"],
+                [
+                    "AFwXgqZ86FAEV1/bGUariw==",
+                    "yNy9SmT13zE=",
+                    100000,
+                    256,
+                    128,
+                    "aes",
+                    "gcm",
+                    "zlib",
+                ],
                 "markdown",
                 0,
                 0,
@@ -60,7 +80,9 @@ def test_get_with_password(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> No
     )
 
     paste = pbin_client.get(
-        id="fca0ed97b16b4fbc", passphrase="9Hv9454VREzvP5XPRZGkwe7snFGJwQ8yj6yqkwU8JAMX", password="8G$SMW@rpE"
+        id="fca0ed97b16b4fbc",
+        passphrase="9Hv9454VREzvP5XPRZGkwe7snFGJwQ8yj6yqkwU8JAMX",
+        password="8G$SMW@rpE",
     )
     assert paste.text == "# Hello from password protected paste!"
     assert paste.formatter is Formatter.MARKDOWN
@@ -73,7 +95,16 @@ def test_get_with_attachment(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> 
             "id": "ba0f3d1b841cc9b0",
             "url": "/?ba0f3d1b841cc9b0=?ba0f3d1b841cc9b0",
             "adata": [
-                ["UBTftZ+Qc5u6B39/Q/3N6A==", "FmAX6Dhuz3U=", 100000, 256, 128, "aes", "gcm", "zlib"],
+                [
+                    "UBTftZ+Qc5u6B39/Q/3N6A==",
+                    "FmAX6Dhuz3U=",
+                    100000,
+                    256,
+                    128,
+                    "aes",
+                    "gcm",
+                    "zlib",
+                ],
                 "plaintext",
                 0,
                 0,
@@ -88,7 +119,9 @@ def test_get_with_attachment(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> 
         }
     )
 
-    paste = pbin_client.get(id="ba0f3d1b841cc9b0", passphrase="vHvco9qjB628q3pc49ajft3tANoxmeMp5ePomi4VagR")
+    paste = pbin_client.get(
+        id="ba0f3d1b841cc9b0", passphrase="vHvco9qjB628q3pc49ajft3tANoxmeMp5ePomi4VagR"
+    )
     assert paste.text == "Hello Attachments!"
     assert paste.attachment is not None
     assert paste.attachment.name == "attachment.txt"
@@ -104,22 +137,30 @@ def test_get_error(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
     )
 
     with pytest.raises(PrivateBinError, match="Something went terribly wrong!"):
-        pbin_client.get(id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH")
+        pbin_client.get(
+            id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
+        )
 
 
 def test_get_unsupported_api_version_1(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(json={"status": 0, "v": 1})
 
     with pytest.raises(
-        PrivateBinError, match=re.escape("Only the v2 API is supported (PrivateBin >= 1.3). Got API version: 1")
+        PrivateBinError,
+        match=re.escape("Only the v2 API is supported (PrivateBin >= 1.3). Got API version: 1"),
     ):
-        pbin_client.get(id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH")
+        pbin_client.get(
+            id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
+        )
 
 
 def test_get_unsupported_api_version_2(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(json={"status": 0, "v": 3})
 
     with pytest.raises(
-        PrivateBinError, match=re.escape("Only the v2 API is supported (PrivateBin >= 1.3). Got API version: 3")
+        PrivateBinError,
+        match=re.escape("Only the v2 API is supported (PrivateBin >= 1.3). Got API version: 3"),
     ):
-        pbin_client.get(id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH")
+        pbin_client.get(
+            id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
+        )
