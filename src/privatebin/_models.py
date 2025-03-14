@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 from urllib.parse import urljoin
 
-from pydantic import Base64Bytes, BaseModel, ConfigDict, field_validator
+from pydantic import (
+    Base64Bytes,
+    BaseModel,
+    ConfigDict,
+    field_serializer,
+    field_validator,
+)
 
 from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
@@ -455,6 +461,22 @@ class Attachment(FrozenModel):
         encoded = base64.b64encode(self.content).decode()
         mimetype = guess_mime_type(self.name)
         return f"data:{mimetype};base64,{encoded}"
+
+    @field_serializer("content", when_used="json")
+    def serialize_content_to_base64_data_url(self, content: bytes) -> str:
+        """
+        Serialize the attachment's content to a base64 data URL when exporting to JSON.
+
+        The `content` parameter in the method signature only exists because
+        it is required by Pydantic's `@field_serializer` decorator. We don't actually use it.
+
+        Returns
+        -------
+        str
+            A base64 encoded data URL string representing the attachment content.
+
+        """
+        return self.to_base64_data_url()
 
 
 class Paste(FrozenModel):
