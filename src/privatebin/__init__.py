@@ -6,6 +6,8 @@ from privatebin._errors import PrivateBinError
 from privatebin._models import Attachment, Paste, PrivateBinUrl
 from privatebin._wrapper import create, delete, get
 
+__version__ = "0.1.0"
+
 __all__ = (
     "Attachment",
     "Compression",

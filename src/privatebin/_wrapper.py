@@ -174,8 +174,6 @@ def create(  # noqa: PLR0913
         msg = f"Parameter 'text' expected str, got {type(text).__name__}."
         raise TypeError(msg)
 
-    print(f"{_server =}")
-
     with PrivateBin(_server) as client:
         return client.create(
             text=text,
