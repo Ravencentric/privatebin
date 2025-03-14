@@ -22,7 +22,9 @@ def create(  # noqa: PLR0913
     text: str | None = None,
     /,
     *,
-    server: Annotated[str, Parameter(name=["--server", "-s"])] = "https://privatebin.net/",
+    server: Annotated[
+        str, Parameter(name=["--server", "-s"], env_var="PRIVATEBIN_SERVER")
+    ] = "https://privatebin.net/",
     attachment: Annotated[
         ResolvedExistingFile | None, Parameter(name=["--attachment", "-a"])
     ] = None,
