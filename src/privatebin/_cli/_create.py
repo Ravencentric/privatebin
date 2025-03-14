@@ -72,7 +72,7 @@ def create(  # noqa: PLR0913
         _formatter_map = {
             "text": Formatter.PLAIN_TEXT,
             "markdown": Formatter.MARKDOWN,
-            "code": Formatter.SYNTAX_HIGHLIGHTING,
+            "code": Formatter.SOURCE_CODE,
         }
 
         url = privatebin.create(

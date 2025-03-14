@@ -16,7 +16,7 @@ class Formatter(StrEnum):
     """Formatting options for PrivateBin content."""
 
     PLAIN_TEXT = "plaintext"
-    SYNTAX_HIGHLIGHTING = "syntaxhighlighting"
+    SOURCE_CODE = "syntaxhighlighting"
     MARKDOWN = "markdown"
 
 
