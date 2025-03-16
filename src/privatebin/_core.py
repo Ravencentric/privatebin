@@ -269,7 +269,7 @@ class PrivateBin:
         encoded_password = password.encode() if password else b""
         passphrase = os.urandom(PrivateBinEncryptionSetting.KEY_SIZE // 8)
 
-        data: dict[str, str | bytes] = {"paste": text}
+        data = {"paste": text}
 
         if attachment:
             data["attachment"] = attachment.to_base64_data_url()
