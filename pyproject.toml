@@ -27,6 +27,7 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/Ravencentric/privatebin"
+Documentation = "https://privatebin.ravencentric.cc/"
 
 [project.optional-dependencies]
 cli = ["cyclopts>=3.9.3", "rich>=13.9.4"]
