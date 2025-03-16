@@ -82,7 +82,7 @@ extend-select = [
 fixable = ["ALL"]
 
 [tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel", "typing.NamedTuple"]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/*" = ["D", "FBT", "PL"]
