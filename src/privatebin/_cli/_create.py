@@ -24,7 +24,7 @@ def create(  # noqa: PLR0913
     *,
     server: Annotated[
         str, Parameter(name=["--server", "-s"], env_var="PRIVATEBIN_SERVER")
-    ] = "https://bin.disroot.org/",
+    ] = "https://privatebin.net/",
     attachment: Annotated[
         ResolvedExistingFile | None, Parameter(name=["--attachment", "-a"])
     ] = None,
