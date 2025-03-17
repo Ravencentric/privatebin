@@ -250,14 +250,15 @@ class PasteJsonLD(FrozenModel):
     """
     Represents a paste GET response from the PrivateBin API (v2).
 
-    This class models the JSON response structure received from the PrivateBin
-    API when retrieving a paste. It is designed to work exclusively with
-    version 2 of the API, which is available in PrivateBin version 1.3 and later.
+    Notes
+    -----
+    - API Version: Only the v2 API is supported (PrivateBin >= 1.3).
+    - Comment Handling: Paste comments are *not* supported and are currently discarded.
 
-    Important Notes:
-        - API Version: Only the v2 API is supported (PrivateBin >= 1.3).
-        - Comment Handling: Paste comments are *not* supported and are currently discarded.
-        - Reference: https://github.com/PrivateBin/PrivateBin/wiki/API#as-of-version-13
+    References
+    ----------
+    - https://raw.githubusercontent.com/PrivateBin/PrivateBin/master/js/paste.jsonld
+    - https://github.com/PrivateBin/PrivateBin/wiki/API#as-of-version-13
 
     Examples
     --------
@@ -317,9 +318,6 @@ class PasteJsonLD(FrozenModel):
         """
         Create a new instance from an API response.
 
-        This class method is responsible for validating and parsing a dictionary
-        representing the JSON response from the PrivateBin API into a `PasteJsonLD` object.
-
         Parameters
         ----------
         response : dict[str, Any]
@@ -335,13 +333,13 @@ class PasteJsonLD(FrozenModel):
             If the API response status is not `0` (success) or if the API version is not `2`.
 
         """
-        if response["status"] != 0:
+        if response.get("status") != 0:
             # {"status":1, "message": "[errormessage]"}
             msg = response.get("message", "Failed to retrieve paste.")
             raise PrivateBinError(msg)
 
-        if response["v"] != 2:  # noqa: PLR2004
-            msg = f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {response['v']}"
+        if response.get("v") != 2:  # noqa: PLR2004
+            msg = f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {response.get('v', 'UNKNOWN')}"
             raise PrivateBinError(msg)
 
         return cls.model_validate(response)
@@ -427,8 +425,8 @@ class Attachment(FrozenModel):
             If the provided `content` string does not match the expected base64 data URL format.
 
         """
-        # https://regex101.com/r/l5gvdn/1
-        pattern = r"^data:(?P<mime>.+);base64,(?P<data>.+)$"
+        # https://regex101.com/r/Wiu431/1
+        pattern = r"^data:(?P<mimetype>.+);base64,(?P<data>.+)$"
         match = re.fullmatch(pattern, content)
 
         if match is None:
@@ -515,10 +513,10 @@ class PrivateBinUrl(FrozenModel):
         Explicitly convert the instance into a complete, unmasked URL string.
 
         This method behaves differently from standard Python string conversions
-        like `str(url)`, `repr(url)`, or f-strings (`f"{url}"`).
+        like `print(url)`, or f-strings (`f"{url}"`).
 
         -  `to_str()` returns the full, unmasked URL with the sensitive passphrase.
-        -  Implicit conversions (`__str__()`, etc.) return a masked URL for safety.
+        -  Implicit conversions (`print()`, f-strings, etc.) return a masked URL for safety.
 
         Call `to_str()` when you explicitly need the full, working URL, for example, to:
 
@@ -535,11 +533,9 @@ class PrivateBinUrl(FrozenModel):
         >>> url = PrivateBinUrl(server="https://example.privatebin.com/", id="pasteid", passphrase="secret", delete_token="deltoken")
         >>> url.to_str()
         'https://example.privatebin.com/?pasteid#secret'
-        >>> str(url)  # String conversion - masked URL
+        >>> print(url)  # Implicit string conversion - masked URL
         'https://example.privatebin.com/?pasteid#********'
-        >>> f"{url}"  # String conversion in f-string - masked URL
-        'https://example.privatebin.com/?pasteid#********'
-        >>> repr(url) # String conversion in repr - masked URL
+        >>> f"{url}"  # Implicit string conversion in f-string - masked URL
         'https://example.privatebin.com/?pasteid#********'
 
         """
