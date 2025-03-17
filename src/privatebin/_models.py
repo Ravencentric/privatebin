@@ -461,7 +461,7 @@ class Attachment(FrozenModel):
         return f"data:{mimetype};base64,{encoded}"
 
     @field_serializer("content", when_used="json")
-    def serialize_content_to_base64_data_url(self, content: bytes) -> str:
+    def _serialize_content_to_base64_data_url(self, content: bytes) -> str:
         """
         Serialize the attachment's content to a base64 data URL when exporting to JSON.
 
