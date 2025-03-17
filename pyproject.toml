@@ -34,7 +34,6 @@ cli = ["cyclopts>=3.10.0", "rich>=13.9.4"]
 
 [project.scripts]
 privatebin = "privatebin.__main__:app"
-pbin = "privatebin.__main__:app"
 
 [dependency-groups]
 docs = [
