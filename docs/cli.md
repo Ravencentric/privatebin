@@ -20,7 +20,7 @@ cat secret.txt | privatebin create
 ## Get a paste
 
 ```bash
-privatebin get "https://privatebin.net/?pasteid#key"
+privatebin get "https://bin.disroot.org/?pasteid#key"
 ```
 
 ## Delete a paste

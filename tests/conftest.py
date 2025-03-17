@@ -12,5 +12,5 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def pbin_client() -> Iterator[PrivateBin]:
-    with PrivateBin() as client:
+    with PrivateBin(server="https://privatebin.net/") as client:
         yield client

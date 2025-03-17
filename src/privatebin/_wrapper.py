@@ -72,7 +72,7 @@ def get(url: str | PrivateBinUrl, *, password: str | None = None) -> Paste:
 def create(  # noqa: PLR0913
     text: str,
     *,
-    server: str | PrivateBinUrl = "https://privatebin.net/",
+    server: str | PrivateBinUrl = "https://bin.disroot.org/",
     attachment: Attachment | None = None,
     password: str | None = None,
     burn_after_reading: bool = False,

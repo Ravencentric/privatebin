@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class PrivateBin:
     def __init__(
         self,
-        server: str = "https://privatebin.net/",
+        server: str,
         *,
         client: httpx.Client | None = None,
     ):
@@ -31,7 +31,7 @@ class PrivateBin:
 
         Parameters
         ----------
-        server : str, optional
+        server : str
             The base URL of the PrivateBin server.
         client : httpx.Client, optional
             An existing [`httpx.Client`][httpx.Client] instance to be used for requests.
@@ -43,20 +43,14 @@ class PrivateBin:
         --------
         Basic usage to instantiate a PrivateBin client:
 
-        >>> client = PrivateBin()
+        >>> client = PrivateBin(server="https://bin.disroot.org/")
         >>> client.server
-        'https://privatebin.net/'
-
-        Using a custom server URL:
-
-        >>> custom_client = PrivateBin(server="https://your-privatebin-instance.com/")
-        >>> custom_client.server
-        'https://your-privatebin-instance.com/'
+        'https://bin.disroot.org/'
 
         Using a context manager:
 
         ```python
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             paste = client.get(id="pasteid", passphrase="pastepassphrase")
             print(paste.text)
         ```
@@ -92,9 +86,9 @@ class PrivateBin:
 
         Examples
         --------
-        >>> client = PrivateBin(server="https://myprivatebin.example.org/")
+        >>> client = PrivateBin(server="https://bin.disroot.org/")
         >>> client.server
-        'https://myprivatebin.example.org/'
+        'https://bin.disroot.org/'
 
         """
         return self._server
@@ -125,7 +119,7 @@ class PrivateBin:
         Examples
         --------
         ```python
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             paste = client.get(id="pasteid", passphrase="pastepassphrase")
             print(paste.text)
             # Prints the decrypted paste text
@@ -243,7 +237,7 @@ class PrivateBin:
         Create a simple paste with default settings:
 
         ```python
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             paste_url = client.create("Hello, PrivateBin!")
             print(f"Paste created at: {paste_url}")
         ```
@@ -251,7 +245,7 @@ class PrivateBin:
         Create a paste with Markdown formatting and burn-after-reading:
 
         ```python
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             md_paste_url = client.create(
                 text="# Markdown Content\\n\\nThis is **markdown** formatted text.",
                 formatter=Formatter.MARKDOWN,
@@ -265,7 +259,7 @@ class PrivateBin:
         ```python
         from privatebin import Attachment, PrivateBin
 
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             attachment = Attachment.from_file("path/to/your/file.txt")
             password_paste_url = client.create(
                 text="This paste has a password and an attachment.",
@@ -363,7 +357,7 @@ class PrivateBin:
         Examples
         --------
         ```python
-        with PrivateBin() as client:
+        with PrivateBin(server="https://bin.disroot.org/") as client:
             paste_url = client.create(text="This paste will be deleted.")
             print(f"Paste URL: {paste_url}")
             delete_id = paste_url.id
