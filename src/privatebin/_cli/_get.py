@@ -4,6 +4,7 @@ from typing import Annotated
 
 import rich
 from cyclopts import App, Parameter
+from cyclopts.types import URL  # noqa: TC002
 
 import privatebin
 
@@ -15,7 +16,7 @@ get_app = App(
 
 @get_app.default
 def get(
-    url: str,
+    url: URL,
     /,
     *,
     password: Annotated[str | None, Parameter(name=["--password", "-p"])] = None,
@@ -27,7 +28,7 @@ def get(
 
     Parameters
     ----------
-    url : str
+    url : URL
         PrivateBin URL of the paste to retrieve.
     password : str, optional
         Password for password-protected pastes.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 try:
-    from cyclopts import App
+    from cyclopts import App, Parameter
 except ModuleNotFoundError:
     import sys
 
@@ -18,6 +18,7 @@ app = App(
     "privatebin",
     help="Command line interface to the PrivateBin API.",
     version=__version__,
+    default_parameter=Parameter(negative=""),
 )
 
 app.command(create_app)

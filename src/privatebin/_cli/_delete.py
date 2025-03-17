@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import rich
 from cyclopts import App
+from cyclopts.types import URL  # noqa: TC002
 
 import privatebin
 
@@ -13,7 +14,7 @@ delete_app = App(
 
 @delete_app.default
 def delete(
-    url: str,
+    url: URL,
     /,
     *,
     token: str,
@@ -23,7 +24,7 @@ def delete(
 
     Parameters
     ----------
-    url : str
+    url : URL
         The complete URL of the PrivateBin paste, with or without the passphrase.
     token : str
         The delete token associated with the paste.
