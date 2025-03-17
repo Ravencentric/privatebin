@@ -141,7 +141,10 @@ class PrivateBin:
         # have a `-` prefix. This is not required for decryption,
         # in fact, it breaks decryption.
         cleaned_passphrase = passphrase.removeprefix("-")
-        encoded_passphrase = base58.b58decode(cleaned_passphrase)
+
+        # Passphrase is a base58 encoded string,
+        # so we need to decode it.
+        decoded_passphrase = base58.b58decode(cleaned_passphrase)
 
         response = self._client.get(self.server, params=id).raise_for_status().json()
         paste = PasteJsonLD.from_response(response)
@@ -152,7 +155,7 @@ class PrivateBin:
             length=cipher_parameters.key_size // 8,
             salt=cipher_parameters.salt,
             iterations=cipher_parameters.iterations,
-            key_material=encoded_passphrase + encoded_password,
+            key_material=decoded_passphrase + encoded_password,
             initialization_vector=cipher_parameters.initialization_vector,
             associated_data=paste.adata.to_bytes(),
         )
@@ -233,6 +236,7 @@ class PrivateBin:
         ------
         PrivateBinError
             If there is an error during paste creation on PrivateBin.
+            If `burn_after_reading` and `open_discussion` are both set to `True`.
 
         Examples
         --------
@@ -272,6 +276,14 @@ class PrivateBin:
         ```
 
         """
+        # Early error if both burn_after_reading and open_discussion are True
+        if burn_after_reading and open_discussion:
+            msg = (
+                "Cannot create a paste with both 'burn_after_reading' and 'open_discussion' enabled. "
+                "A paste that burns after reading cannot have open discussions."
+            )
+            raise PrivateBinError(msg)
+
         initialization_vector = os.urandom(PrivateBinEncryptionSetting.TAG_SIZE // 8)
         salt = os.urandom(PrivateBinEncryptionSetting.SALT_SIZE)
 
@@ -321,7 +333,7 @@ class PrivateBin:
             self._client.post(url=self.server, json=payload).raise_for_status().json()
         )
 
-        if response["status"] != 0:
+        if response.get("status") != 0:
             msg = response.get("message", "Failed to create paste.")
             raise PrivateBinError(msg)
 
@@ -369,7 +381,7 @@ class PrivateBin:
             self._client.post(self.server, json=payload).raise_for_status().json()
         )
 
-        if response["status"] != 0:
+        if response.get("status") != 0:
             msg = response.get("message", "Failed to delete paste.")
             raise PrivateBinError(msg)
 

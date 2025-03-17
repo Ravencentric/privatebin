@@ -45,3 +45,13 @@ def test_create_error(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
 
     with pytest.raises(PrivateBinError, match="Something went terribly wrong!"):
         pbin_client.create(text="hello world")
+
+
+def test_create_error_with_burn_and_open_discussion(pbin_client: PrivateBin) -> None:
+    errmsg = (
+        "Cannot create a paste with both 'burn_after_reading' and 'open_discussion' enabled. "
+        "A paste that burns after reading cannot have open discussions."
+    )
+
+    with pytest.raises(PrivateBinError, match=errmsg):
+        pbin_client.create(text="hello world", burn_after_reading=True, open_discussion=True)

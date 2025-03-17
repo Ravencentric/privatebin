@@ -21,6 +21,10 @@ def test_attachment_from_file(tmp_path: Path) -> None:
     assert attachment.content == b"hello from attachment"
 
     assert attachment.to_base64_data_url() == "data:text/plain;base64,aGVsbG8gZnJvbSBhdHRhY2htZW50"
+    assert (
+        attachment.model_dump_json()
+        == '{"content":"data:text/plain;base64,aGVsbG8gZnJvbSBhdHRhY2htZW50","name":"attachment.txt"}'
+    )
 
 
 def test_attachment_from_file_with_different_name(tmp_path: Path) -> None:
