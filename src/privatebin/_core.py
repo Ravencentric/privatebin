@@ -13,6 +13,7 @@ from privatebin._enums import Compression, Expiration, Formatter, PrivateBinEncr
 from privatebin._errors import PrivateBinError
 from privatebin._models import Attachment, AuthenticatedData, Paste, PasteJsonLD, PrivateBinUrl
 from privatebin._utils import Zlib, to_compact_json
+from privatebin._version import __version__
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -62,7 +63,15 @@ class PrivateBin:
 
         """
         self._server = server
-        self._client = httpx.Client() if client is None else client
+        self._client = (
+            httpx.Client(
+                headers={
+                    "User-Agent": f"privatebin/{__version__} (https://pypi.org/project/privatebin/)"
+                }
+            )
+            if client is None
+            else client
+        )
         self._client.headers.update({"X-Requested-With": "JSONHttpRequest"})
 
     def __enter__(self) -> Self:

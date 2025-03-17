@@ -11,13 +11,13 @@ except ModuleNotFoundError:
     )
     sys.exit(1)
 
-import privatebin
 from privatebin._cli import create_app, delete_app, get_app
+from privatebin._version import __version__
 
 app = App(
     "privatebin",
     help="Command line interface to the PrivateBin API.",
-    version=privatebin.__version__,
+    version=__version__,
 )
 
 app.command(create_app)
