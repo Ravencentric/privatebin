@@ -330,7 +330,7 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.9.3"
+version = "3.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -339,9 +339,9 @@ dependencies = [
     { name = "rich-rst" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/eb/3c7304d43226e2cfa789843b17559fccccdd06137d943f0e9730a52906a7/cyclopts-3.9.3.tar.gz", hash = "sha256:7f06de79b12d41d7b36f18008518a4114222a03f2bceaa0e4ad20701ccd21e9f", size = 67174 }
+sdist = { url = "https://files.pythonhosted.org/packages/19/2b/79ad6eab53c9c557b083bf34021d3966e79d2457824a2577935cee566c39/cyclopts-3.10.0.tar.gz", hash = "sha256:97891b603219957773df1b075b43e6ddba261e242278d563a31e7e6f2edad6ab", size = 68232 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/20/b1/e566129978ce7c3a496e8645eafc86458732f24dc38542fc8aa82ce1c035/cyclopts-3.9.3-py3-none-any.whl", hash = "sha256:a542b787edfa00c4a1321b4dba215972792d4f6c432601112486cb3402978771", size = 76870 },
+    { url = "https://files.pythonhosted.org/packages/d1/ae/91e6240b43ab056d2caf58947aff06ae239e0de05c8ea0a18eb5d878ce13/cyclopts-3.10.0-py3-none-any.whl", hash = "sha256:9b5632b6b67a166879e5e92d91c6c5896219936a0684dc4c5651a7d4cfa0ea17", size = 77933 },
 ]
 
 [[package]]
@@ -823,7 +823,7 @@ test = [
 requires-dist = [
     { name = "base58", specifier = ">=2.1.1" },
     { name = "cryptography", specifier = ">=44.0.2" },
-    { name = "cyclopts", marker = "extra == 'cli'", specifier = ">=3.9.3" },
+    { name = "cyclopts", marker = "extra == 'cli'", specifier = ">=3.10.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "rich", marker = "extra == 'cli'", specifier = ">=13.9.4" },
