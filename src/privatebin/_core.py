@@ -229,8 +229,8 @@ class PrivateBin:
         Raises
         ------
         PrivateBinError
-            If there is an error during paste creation on PrivateBin.
-            If `burn_after_reading` and `open_discussion` are both set to `True`.
+            - If `burn_after_reading` and `open_discussion` are both set to `True`.
+            - If there is an error during paste creation on PrivateBin.
 
         Examples
         --------
