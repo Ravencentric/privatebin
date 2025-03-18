@@ -485,7 +485,7 @@ class Paste(FrozenModel):
     text: str
     """The decrypted text content of the paste."""
     attachment: Attachment | None
-    """Optional attachment associated with the paste."""
+    """Attachment associated with the paste, if any."""
     formatter: Formatter
     """Formatting option applied to the paste content."""
     open_discussion: bool
