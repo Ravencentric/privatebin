@@ -116,6 +116,7 @@ def create(  # noqa: PLR0913
     ------
     PrivateBinError
         If there is an error during paste creation on PrivateBin.
+        If `burn_after_reading` and `open_discussion` are both set to `True`.
     TypeError
         If the provided `url` is not a string or a `PrivateBinUrl` object.
 
