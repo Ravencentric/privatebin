@@ -512,7 +512,7 @@ class PrivateBinUrl(FrozenModel):
         """
         Explicitly convert the instance into a complete, unmasked URL string.
 
-        This method behaves differently from standard Python string conversions
+        This method behaves differently from implicit Python string conversions
         like `print(url)`, or f-strings (`f"{url}"`).
 
         -  `to_str()` returns the full, unmasked URL with the sensitive passphrase.
