@@ -33,6 +33,8 @@ def get(url: str | PrivateBinUrl, *, password: str | None = None) -> Paste:
     Examples
     --------
     ```python
+    import privatebin
+
     paste = privatebin.get("https://privatebin.net/?pasteid#passphrase")
     print(paste.text)
     ```
@@ -40,6 +42,8 @@ def get(url: str | PrivateBinUrl, *, password: str | None = None) -> Paste:
     For password-protected pastes:
 
     ```python
+    import privatebin
+
     paste = privatebin.get("https://privatebin.net/?pasteid#passphrase", password="pastepassword")
     print(paste.text)
     ```
@@ -211,6 +215,8 @@ def delete(url: str | PrivateBinUrl, *, delete_token: str) -> None:
     Examples
     --------
     ```python
+    import privatebin
+
     paste_url = privatebin.create(text="This paste will be deleted.")
     delete(paste_url, delete_token=paste_url.delete_token)
     print(f"Paste with URL '{delete_url}' deleted.")

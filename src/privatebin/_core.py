@@ -119,6 +119,8 @@ class PrivateBin:
         Examples
         --------
         ```python
+        from privatebin import PrivateBin
+
         with PrivateBin() as client:
             paste = client.get(id="pasteid", passphrase="pastepassphrase")
             print(paste.text)
@@ -237,6 +239,8 @@ class PrivateBin:
         Create a simple paste with default settings:
 
         ```python
+        from privatebin import PrivateBin
+
         with PrivateBin() as client:
             paste_url = client.create("Hello, PrivateBin!")
             print(f"Paste created at: {paste_url}")
@@ -245,6 +249,8 @@ class PrivateBin:
         Create a paste with Markdown formatting and burn-after-reading:
 
         ```python
+        from privatebin import Formatter, PrivateBin
+
         with PrivateBin() as client:
             md_paste_url = client.create(
                 text="# Markdown Content\\n\\nThis is **markdown** formatted text.",
@@ -357,6 +363,8 @@ class PrivateBin:
         Examples
         --------
         ```python
+        from privatebin import PrivateBin
+
         with PrivateBin() as client:
             paste_url = client.create(text="This paste will be deleted.")
             print(f"Paste URL: {paste_url}")
