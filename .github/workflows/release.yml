@@ -44,7 +44,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
 
       - name: Generate a changelog
-        run: uvx git-cliff --config github --latest --strip all --output "CHANGELOG.md"
+        run: >-
+          uvx git-cliff --config github 
+          --github-repo ${{ github.repository }}
+          --github-token ${{ github.token }}
+          --latest --strip all --output "CHANGELOG.md"
 
       - name: Create Release
         run: gh release create ${{ github.ref_name }} -F "CHANGELOG.md" --fail-on-no-commits
