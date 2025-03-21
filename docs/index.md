@@ -15,9 +15,28 @@ Python library for interacting with PrivateBin's v2 API (PrivateBin >= 1.3) to c
 
 `privatebin` is available on [PyPI](https://pypi.org/project/privatebin/), so you can simply use [pip](https://github.com/pypa/pip) to install it.
 
-```sh
-pip install privatebin
-```
+1. To install the core library:
+
+    ```sh
+    pip install privatebin
+    ```
+
+2. To install the CLI:
+
+    - With [`pipx`](https://pipx.pypa.io/stable/) or [`uv`](https://docs.astral.sh/uv/guides/tools/#installing-tools) (recommended)
+
+        ```sh
+        pipx install "privatebin[cli]"
+        ```
+        ```sh
+        uv tool install "privatebin[cli]"
+        ```
+
+    - With [`pip`](https://pip.pypa.io/en/stable/installation/)
+
+        ```sh
+        pip install "privatebin[cli]"
+        ```
 
 ## License
 
