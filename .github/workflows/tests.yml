@@ -8,6 +8,8 @@ on:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/tests.yml'
+    tags-ignore:
+      - 'v*.*.*'
   pull_request:
     branches:
       - main
