@@ -474,8 +474,8 @@ class Attachment(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            Number of spaces for indentation. 
-            Set to 0 for a single line with spacing, 
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
             or negative to minimize size by removing extra whitespace.
 
         Returns
@@ -530,8 +530,8 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            Number of spaces for indentation. 
-            Set to 0 for a single line with spacing, 
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
             or negative to minimize size by removing extra whitespace.
 
         Returns
@@ -613,8 +613,8 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            Number of spaces for indentation. 
-            Set to 0 for a single line with spacing, 
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
             or negative to minimize size by removing extra whitespace.
 
         Returns
