@@ -43,9 +43,9 @@ def get(
 
         if json:
             if pretty:
-                rich.print_json(paste.model_dump_json())
+                rich.print_json(paste.to_json())
             else:
-                print(paste.model_dump_json(indent=2))
+                print(paste.to_json())
         else:
             print(paste.text)
 

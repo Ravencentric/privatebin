@@ -7,13 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 from urllib.parse import urljoin
 
-from pydantic import (
-    Base64Bytes,
-    BaseModel,
-    ConfigDict,
-    field_serializer,
-    field_validator,
-)
+import msgspec
 
 from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
@@ -25,35 +19,32 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class FrozenModel(BaseModel):
-    """Frozen model."""
-
-    model_config = ConfigDict(frozen=True)
-
-
 class CipherParameters(NamedTuple):
     """
     Parameters defining the cipher configuration for encrypting PrivateBin pastes.
 
-    Base64Bytes Behavior:
-    ---------------------
+    Notes
+    -----
     The PrivateBin API returns the `salt` and `initialization_vector`
-    as base64 encoded strings. Pydantic's `Base64Bytes` type automatically
-    handles this by decoding the base64 strings back into raw bytes when
-    parsing the API response. Therefore, when we access `cipher_parameters.salt`
-    and `cipher_parameters.initialization_vector`, we are working with the
+    as base64 encoded strings. msgspec automatically handles this by
+    decoding the base64 strings back into raw bytes when parsing the API response.
+    Therefore, when we access `cipher_parameters.salt` and
+    `cipher_parameters.initialization_vector`, we are working with the
     *raw bytes* of the `salt` and `initialization_vector`.
 
-    Example: Base64Bytes Decoding
-    -----------------------------
+    Examples
+    --------
     ```python
     import base64
     import os
-    from pydantic import Base64Bytes, BaseModel
 
-    class ApiResponse(BaseModel):
-        iv: Base64Bytes
-        salt: Base64Bytes
+    import msgspec
+
+
+    class ApiResponse(msgspec.Struct):
+        iv: bytes
+        salt: bytes
+
 
     raw_iv_bytes = os.urandom(16)
     raw_salt_bytes = os.urandom(8)
@@ -62,16 +53,17 @@ class CipherParameters(NamedTuple):
     base64_salt_str = base64.b64encode(raw_salt_bytes).decode()
 
     api_response_dict = {"iv": base64_iv_str, "salt": base64_salt_str}
-    parsed_response = ApiResponse.model_validate(api_response_dict)
+    parsed_response = msgspec.convert(api_response_dict, type=ApiResponse)
 
     assert parsed_response.iv == raw_iv_bytes == base64.b64decode(base64_iv_str)
     assert parsed_response.salt == raw_salt_bytes == base64.b64decode(base64_salt_str)
     ```
+
     """
 
-    initialization_vector: Base64Bytes
+    initialization_vector: bytes
     """The initialization vector (IV) as Base64 encoded bytes."""
-    salt: Base64Bytes
+    salt: bytes
     """The salt as Base64 encoded bytes."""
     iterations: int
     """The number of iterations for the key derivation function (PBKDF2HMAC)."""
@@ -236,7 +228,7 @@ class AuthenticatedData(NamedTuple):
         return to_compact_json(self.to_tuple()).encode()
 
 
-class MetaData(FrozenModel):
+class MetaData(msgspec.Struct, frozen=True, kw_only=True):
     """Metadata received with a PrivateBin paste from the server."""
 
     time_to_live: timedelta | None = None
@@ -246,7 +238,7 @@ class MetaData(FrozenModel):
     """
 
 
-class PasteJsonLD(FrozenModel):
+class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
     """
     Represents a paste GET response from the PrivateBin API (v2).
 
@@ -264,31 +256,31 @@ class PasteJsonLD(FrozenModel):
     --------
     Example of a typical JSON response structure parsed by this class:
 
-    ```json
+    ```python
     {
     "status": 0,
     "id": "4e7cea11af458924",
     "url": "/?4e7cea11af458924?4e7cea11af458924",
     "adata": [
         [
-        "GEEM/99wIW5yItxLXOCRAQ==",
-        "d8v8piD9qto=",
-        100000,
-        256,
-        128,
-        "aes",
-        "gcm",
-        "zlib"
+        "GEEM/99wIW5yItxLXOCRAQ==",  # <--- Base64 encoded initialization vector
+        "d8v8piD9qto=",  # <--- Base64 encoded salt
+        100000,  # <--- Iterations
+        256,  # <--- Key size
+        128,  # <--- Tag size
+        "aes",  # <--- Algorithm
+        "gcm",  # <--- Mode
+        "zlib"  # <--- Compression
         ],
-        "plaintext",
-        0,
-        0
+        "plaintext",  # <--- Formatter
+        0,  # <--- Open discussion
+        0  # <--- Burn after reading
     ],
     "meta": {
         "time_to_live": 86315
     },
     "v": 2,
-    "ct": "RgE133BlXs5fjuv0DWboLHKR3WaZPsgszQemDujTJkPprvgIFpqaBLEN",
+    "ct": "RgE133BlXs5fjuv0DWboLHKR3WaZPsgszQemDujTJkPprvgIFpqaBLEN",  # <--- Base64 encoded ciphertext
     "comments": [],
     "comment_count": 0,
     "comment_offset": 0,
@@ -310,8 +302,8 @@ class PasteJsonLD(FrozenModel):
     """Metadata associated with the paste."""
     v: Literal[2]
     """Version number of the PrivateBin API. Must be `2` for v2 API compatibility."""
-    ct: Base64Bytes
-    """Ciphertext: Base64 encoded encrypted content of the paste."""
+    ct: bytes
+    """Ciphertext: Encrypted content of the paste."""
 
     @classmethod
     def from_response(cls, response: dict[str, Any]) -> Self:
@@ -342,28 +334,29 @@ class PasteJsonLD(FrozenModel):
             msg = f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {response.get('v', 'UNKNOWN')}"
             raise PrivateBinError(msg)
 
-        return cls.model_validate(response)
+        # Possible values:
+        # - [] (empty list) - Will not expire
+        # - {"time_to_live": 12345} - Will expire in 12345 seconds
+        if not response.get("meta"):
+            # The API uses an empty list in 'meta' to mean the data won't expire.
+            # The `MetaData` class needs 'meta' to be a dictionary with 'time_to_live'.
+            # So we turn the API's empty list into {'time_to_live': None}
+            # so `MetaData` can correctly parse it.
+            response["meta"] = {"time_to_live": None}
 
-    @field_validator("meta", mode="before")
-    @classmethod
-    def normalize_meta(cls, value: Any) -> Any:
-        """
-        Normalize the 'meta' field from the API response before validation.
-
-        Normalization Process:
-            - If 'meta' is an empty list `[]`, it is converted into an empty `MetaData` instance.
-            - If 'meta' is already a dictionary, it is used as is for creating a `MetaData` instance.
-        """
-        return value if value else MetaData()
+        # PrivateBin API declares `open_discussion` and `burn_after_reading` (in `AuthenticatedData.cipher_parameters`)
+        # as booleans, but its response contains them as integers (0 or 1).
+        # `strict=False` allows msgspec to coerce these integers into booleans.
+        return msgspec.convert(response, cls, strict=False)
 
 
-class Attachment(FrozenModel):
+class Attachment(msgspec.Struct, frozen=True, kw_only=True):
     """Represents an attachment with its content and name."""
 
-    content: bytes
-    """The binary content of the attachment."""
     name: str
     """The name of the attachment."""
+    content: bytes
+    """The binary content of the attachment."""
 
     @classmethod
     def from_file(cls, file: str | PathLike[str], *, name: str | None = None) -> Self:
@@ -400,18 +393,16 @@ class Attachment(FrozenModel):
         return cls(content=content, name=filename)
 
     @classmethod
-    def from_base64_data_url(cls, *, content: str, name: str) -> Self:
+    def from_data_url(cls, *, url: str, name: str) -> Self:
         """
-        Create an Attachment from a base64 encoded data URL string.
+        Create an Attachment from a [data URL][Data URL].
 
-        Decodes a base64 encoded data URL string, expected to be in the format
-        ``data:<mimetype>;base64,<data>``, and creates an `Attachment`.
+        [data URL]: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data
 
         Parameters
         ----------
-        content : str
-            Base64 encoded string representing the attachment content,
-            including the data URL prefix.
+        url : str
+            Attachment content as a data URL.
         name : str
             The desired name for the attachment.
 
@@ -422,62 +413,84 @@ class Attachment(FrozenModel):
         Raises
         ------
         ValueError
-            If the provided `content` string does not match the expected base64 data URL format.
+            If the provided `url` is not a data URL.
 
         """
         # https://regex101.com/r/Wiu431/1
         pattern = r"^data:(?P<mimetype>.+);base64,(?P<data>.+)$"
-        match = re.fullmatch(pattern, content)
+        match = re.fullmatch(pattern, url)
 
         if match is None:
-            truncated = content[:50] + "... (TRUNCATED)" if len(content) > 50 else content  # noqa: PLR2004
+            truncated = url[:50] + "... (TRUNCATED)" if len(url) > 50 else url  # noqa: PLR2004
             msg = (
                 "Paste has an invalid or unsupported attachment. "
-                f"Expected format: 'data:<mimetype>;base64,<data>', got: {truncated!r}"
+                f"Expected a data URL: 'data:<mimetype>;base64,<data>', got: {truncated!r}"
             )
             raise ValueError(msg)
 
         data = match.group("data")
-        decoded = base64.b64decode(data)
+        content = base64.b64decode(data)
 
-        return cls(content=decoded, name=name)
+        return cls(content=content, name=name)
 
-    def to_base64_data_url(self) -> str:
+    def to_data_url(self) -> str:
         """
-        Convert the Attachment's binary content to a base64 encoded data URL string.
+        Convert the Attachment's binary content to a [data URL][Data URL].
 
-        Encodes the attachment's content to base64 and formats it as a data URL
-        string, including a MIME type guessed from the attachment's name.
-        If a MIME type cannot be guessed, it defaults to `application/octet-stream`.
+        [Data URL]: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data
 
         Returns
         -------
         str
-            A base64 encoded data URL string representing the attachment content.
+            A data URL representing the attachment content.
 
         """
         encoded = base64.b64encode(self.content).decode()
         mimetype = guess_mime_type(self.name)
         return f"data:{mimetype};base64,{encoded}"
 
-    @field_serializer("content", when_used="json")
-    def _serialize_content_to_base64_data_url(self, content: bytes) -> str:
+    @classmethod
+    def from_json(cls, data: str, /) -> Self:
         """
-        Serialize the attachment's content to a base64 data URL when exporting to JSON.
+        Create an Attachment instance from a JSON string.
 
-        The `content` parameter in the method signature only exists because
-        it is required by Pydantic's `@field_serializer` decorator. We don't actually use it.
+        Parameters
+        ----------
+        data : str
+            JSON string representing the Attachment instance.
+
+        Returns
+        -------
+        Self
+
+        """
+        return msgspec.json.decode(data, type=cls)
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize the Attachment instance into a JSON string.
+        The `content` (binary data) will be a base64 encoded string in the JSON output.
+
+        Parameters
+        ----------
+        indent : int, optional
+            How many spaces to indent for a single indentation level.
+            Defaults to 2. Set to 0 to format the message as a single line,
+            with spaces added between items for readability.
+            Set to a negative number to strip all unnecessary whitespace,
+            minimizing the size.
 
         Returns
         -------
         str
-            A base64 encoded data URL string representing the attachment content.
+            JSON string representing the Attachment.
 
         """
-        return self.to_base64_data_url()
+        jsonified = msgspec.json.encode(self).decode()
+        return msgspec.json.format(jsonified, indent=indent)
 
 
-class Paste(FrozenModel):
+class Paste(msgspec.Struct, frozen=True, kw_only=True):
     """Represents a PrivateBin paste."""
 
     id: str
@@ -495,8 +508,47 @@ class Paste(FrozenModel):
     time_to_live: timedelta | None
     """Time duration for which the paste is set to be stored, if any."""
 
+    @classmethod
+    def from_json(cls, data: str, /) -> Self:
+        """
+        Create an Paste instance from a JSON string.
 
-class PrivateBinUrl(FrozenModel):
+        Parameters
+        ----------
+        data : str
+            JSON string representing the Paste instance.
+
+        Returns
+        -------
+        Self
+
+        """
+        return msgspec.json.decode(data, type=cls)
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize the Paste instance into a JSON string.
+
+        Parameters
+        ----------
+        indent : int, optional
+            How many spaces to indent for a single indentation level.
+            Defaults to 2. Set to 0 to format the message as a single line,
+            with spaces added between items for readability.
+            Set to a negative number to strip all unnecessary whitespace,
+            minimizing the size.
+
+        Returns
+        -------
+        str
+            JSON string representing the Paste.
+
+        """
+        jsonified = msgspec.json.encode(self).decode()
+        return msgspec.json.format(jsonified, indent=indent)
+
+
+class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
     """Represents a parsed PrivateBin URL, including its components and delete token."""
 
     server: str
@@ -540,6 +592,54 @@ class PrivateBinUrl(FrozenModel):
 
         """
         return urljoin(self.server, f"/?{self.id}#{self.passphrase}")
+
+    @classmethod
+    def from_json(cls, data: str, /) -> Self:
+        """
+        Create an PrivateBinUrl instance from a JSON string.
+
+        Parameters
+        ----------
+        data : str
+            JSON string representing the PrivateBinUrl instance.
+
+        Returns
+        -------
+        Self
+
+        """
+        return msgspec.json.decode(data, type=cls)
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize the PrivateBinUrl instance into a JSON string.
+
+        Parameters
+        ----------
+        indent : int, optional
+            How many spaces to indent for a single indentation level.
+            Defaults to 2. Set to 0 to format the message as a single line,
+            with spaces added between items for readability.
+            Set to a negative number to strip all unnecessary whitespace,
+            minimizing the size.
+
+        Returns
+        -------
+        str
+            JSON string representing the PrivateBinUrl.
+
+        Notes
+        -----
+        This method includes the sensitive `passphrase` in the JSON output.
+        It also adds an extra field named `"url"` to the JSON, which is not part of
+        `PrivateBinUrl` but is generated using the `to_str()` method for convenience.
+
+        """
+        basic = msgspec.to_builtins(self)
+        # Add the full URL to the JSON output
+        basic["url"] = self.to_str()
+        jsonified = msgspec.json.encode(basic).decode()
+        return msgspec.json.format(jsonified, indent=indent)
 
     def __str__(self) -> str:
         """

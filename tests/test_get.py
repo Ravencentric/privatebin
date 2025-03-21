@@ -46,6 +46,45 @@ def test_get(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
         id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
     )
     assert paste.text == "Hello World!"
+    assert paste.time_to_live is not None
+
+
+def test_get_with_no_expiry(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
+    httpx_mock.add_response(
+        json={
+            "status": 0,
+            "id": "8ed8eb3736994f7d",
+            "url": "/?8ed8eb3736994f7d=?8ed8eb3736994f7d",
+            "adata": [
+                [
+                    "EhGlr6MDIrNHFyhdMAE6gA==",
+                    "wATfGNcSqjM=",
+                    100000,
+                    256,
+                    128,
+                    "aes",
+                    "gcm",
+                    "zlib",
+                ],
+                "plaintext",
+                0,
+                0,
+            ],
+            "meta": [],
+            "v": 2,
+            "ct": "NnMN8PGFNUzKNnXXz9DLhX/c5Ukb0rn61BDqZYVttkEqrUJDIm9r20bH",
+            "comments": [],
+            "comment_count": 0,
+            "comment_offset": 0,
+            "@context": "?jsonld=paste",
+        }
+    )
+
+    paste = pbin_client.get(
+        id="8ed8eb3736994f7d", passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH"
+    )
+    assert paste.text == "Hello World!"
+    assert paste.time_to_live is None
 
 
 def test_get_with_password(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:

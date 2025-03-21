@@ -170,9 +170,9 @@ class PrivateBin:
 
         try:
             text = finalized["paste"]
-            content = finalized["attachment"]
+            data_url = finalized["attachment"]
             name = finalized["attachment_name"]
-            attachment = Attachment.from_base64_data_url(content=content, name=name)
+            attachment = Attachment.from_data_url(url=data_url, name=name)
         except KeyError:
             text = finalized["paste"]
             attachment = None
@@ -293,7 +293,7 @@ class PrivateBin:
         data = {"paste": text}
 
         if attachment:
-            data["attachment"] = attachment.to_base64_data_url()
+            data["attachment"] = attachment.to_data_url()
             data["attachment_name"] = attachment.name
 
         encoded_data = to_compact_json(data).encode()
