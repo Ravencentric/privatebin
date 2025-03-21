@@ -474,11 +474,9 @@ class Attachment(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            How many spaces to indent for a single indentation level.
-            Defaults to 2. Set to 0 to format the message as a single line,
-            with spaces added between items for readability.
-            Set to a negative number to strip all unnecessary whitespace,
-            minimizing the size.
+            Number of spaces for indentation. 
+            Set to 0 for a single line with spacing, 
+            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
@@ -532,11 +530,9 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            How many spaces to indent for a single indentation level.
-            Defaults to 2. Set to 0 to format the message as a single line,
-            with spaces added between items for readability.
-            Set to a negative number to strip all unnecessary whitespace,
-            minimizing the size.
+            Number of spaces for indentation. 
+            Set to 0 for a single line with spacing, 
+            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
@@ -617,11 +613,9 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         indent : int, optional
-            How many spaces to indent for a single indentation level.
-            Defaults to 2. Set to 0 to format the message as a single line,
-            with spaces added between items for readability.
-            Set to a negative number to strip all unnecessary whitespace,
-            minimizing the size.
+            Number of spaces for indentation. 
+            Set to 0 for a single line with spacing, 
+            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
