@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json as _json
 import sys
 from typing import Annotated, Literal
 
@@ -87,15 +86,11 @@ def create(  # noqa: PLR0913
             formatter=_formatter_map[formatter],
         )
 
-        _dict = url.model_dump(mode="json")
-        _dict["url"] = url.to_str()
-        _rejson = _json.dumps(_dict, indent=2)
-
         if json:
             if pretty:
-                rich.print_json(_rejson)
+                rich.print_json(url.to_json())
             else:
-                print(_rejson)
+                print(url.to_json())
         else:
             print(url.to_str())
 

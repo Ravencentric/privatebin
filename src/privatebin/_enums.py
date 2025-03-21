@@ -6,7 +6,10 @@ from enum import IntEnum
 if sys.version_info >= (3, 11):
     from enum import StrEnum
 else:
-    from stringenum import StrEnum
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
 
 # Enums based on PrivateBin's types.jsonld:
 # Reference: https://raw.githubusercontent.com/PrivateBin/PrivateBin/master/js/types.jsonld
