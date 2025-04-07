@@ -72,9 +72,9 @@ class CipherParameters(NamedTuple):
     tag_size: int
     """The size of the authentication tag in bits for AESGCM."""
     algorithm: Literal["aes"]
-    """The encryption algorithm. Currently the only support value is 'aes'."""
+    """The encryption algorithm. Currently the only supported value is 'aes'."""
     mode: Literal["gcm"]
-    """The encryption mode of operation. Currently the only support value is 'gcm'."""
+    """The encryption mode of operation. Currently the only supported value is 'gcm'."""
     compression: Compression
     """The compression algorithm used before encryption."""
 
