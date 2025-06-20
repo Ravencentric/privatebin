@@ -11,7 +11,14 @@ import httpx
 from privatebin._crypto import decrypt, encrypt
 from privatebin._enums import Compression, Expiration, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
-from privatebin._models import Attachment, AuthenticatedData, Paste, PasteJsonLD, PrivateBinUrl
+from privatebin._models import (
+    Attachment,
+    AuthenticatedData,
+    Paste,
+    PasteJsonLD,
+    PrivateBinUrl,
+    RawPasteContent,
+)
 from privatebin._utils import Zlib, to_compact_json
 from privatebin._version import __version__
 
@@ -162,11 +169,7 @@ class PrivateBin:
             else decrypted
         )
 
-        # The finalized object is a dictionary with 1 mandatory key (`paste`)
-        # and two optional keys (`attachment` and `attachment_name`)
-        # Example:
-        # {"paste": "hello world!", "attachment": "data:application/octet-stream;base64,TUlUIE...JFLg0K", "attachment_name": "LICENSE-MIT"}
-        finalized = json.loads(decompressed)
+        finalized: RawPasteContent = json.loads(decompressed)
 
         try:
             text = finalized["paste"]
@@ -290,8 +293,7 @@ class PrivateBin:
         encoded_password = password.encode() if password else b""
         passphrase = os.urandom(PrivateBinEncryptionSetting.KEY_SIZE // 8)
 
-        data = {"paste": text}
-
+        data = RawPasteContent(paste=text)
         if attachment:
             data["attachment"] = attachment.to_data_url()
             data["attachment_name"] = attachment.name

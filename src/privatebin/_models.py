@@ -4,7 +4,7 @@ import base64
 import re
 from datetime import timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, NotRequired, TypedDict
 from urllib.parse import urljoin
 
 import msgspec
@@ -17,6 +17,26 @@ if TYPE_CHECKING:
     from os import PathLike
 
     from typing_extensions import Self
+
+
+class RawPasteContent(TypedDict):
+    """
+    Represents the raw paste content.
+    This is what we POST to PrivateBin after attaching the necessary metadata
+    and this is what we get back from PrivateBin after the necessary post-processing.
+
+    ```json
+    {
+        "paste": "Hello World!",
+        "attachment": "data:text/plain;base64,VGhpcyBpcyBhbiBhdHRhY2htZW50Lg==",
+        "attachment_name": "hello.txt"
+    }
+    ```
+    """
+
+    paste: str
+    attachment: NotRequired[str]
+    attachment_name: NotRequired[str]
 
 
 class CipherParameters(NamedTuple):
@@ -397,7 +417,7 @@ class Attachment(msgspec.Struct, frozen=True, kw_only=True):
         """
         Create an Attachment from a [data URL][Data URL].
 
-        [data URL]: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data
+        [Data URL]: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data
 
         Parameters
         ----------
