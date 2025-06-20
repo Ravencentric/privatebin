@@ -4,7 +4,7 @@ import base64
 import re
 from datetime import timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, NotRequired, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypedDict
 from urllib.parse import urljoin
 
 import msgspec
@@ -16,7 +16,7 @@ from privatebin._utils import guess_mime_type, to_compact_json
 if TYPE_CHECKING:
     from os import PathLike
 
-    from typing_extensions import Self
+    from typing_extensions import NotRequired, Self
 
 
 class RawPasteContent(TypedDict):
