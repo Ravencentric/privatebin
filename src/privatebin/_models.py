@@ -529,7 +529,7 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
     @classmethod
     def from_json(cls, data: str, /) -> Self:
         """
-        Create an Paste instance from a JSON string.
+        Create a Paste instance from a JSON string.
 
         Parameters
         ----------
@@ -564,7 +564,7 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
         return msgspec.json.format(jsonified, indent=indent)
 
 
-class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
+class BasePrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
     """Represents a readable PrivateBin URL."""
 
     server: str
@@ -610,7 +610,7 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
     @classmethod
     def from_json(cls, data: str, /) -> Self:
         """
-        Create an PrivateBinUrl instance from a JSON string.
+        Create a PrivateBinUrl instance from a JSON string.
 
         Parameters
         ----------
@@ -685,3 +685,100 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
 
         """
         return self.__str__()
+
+
+class PrivateBinUrl(BasePrivateBinUrl, frozen=True, kw_only=True):
+    """Represents a readable PrivateBin URL."""
+
+    @classmethod
+    def parse(cls, url: str, /) -> Self:
+        """
+        Create a PrivateBinUrl instance from a URL string.
+
+        Parameters
+        ----------
+        url : str
+            A PrivateBin URL string.
+
+        Returns
+        -------
+        Self
+
+        Raises
+        ------
+        ValueError
+            If the provided `url` string is not in the expected format.
+        TypeError
+            If the provided `url` is not a string.
+
+        """
+        if not isinstance(url, str):
+            msg = f"Expected a string for the 'url' parameter, but got {type(url).__name__!r}. "
+            raise TypeError(msg)
+
+        try:
+            server, id_passphrase = url.strip().split("?")
+            id, passphrase = id_passphrase.split("#")
+        except ValueError:
+            msg = (
+                "Invalid PrivateBin URL format. "
+                "Expected format: 'https://examplebin.net/?pasteid#passphrase'. "
+                f"Got: {url!r}"
+            )
+            raise ValueError(msg) from None
+
+        return cls(server=server, id=id, passphrase=passphrase)
+
+
+class DeletablePrivateBinUrl(BasePrivateBinUrl, frozen=True, kw_only=True):
+    """Represents a PrivateBin URL that is both readable and deletable."""
+
+    delete_token: str
+    """The delete token. Authorizes deletion of the paste."""
+
+    @classmethod
+    def parse(cls, url: str | PrivateBinUrl, /, *, delete_token: str) -> Self:
+        """
+        Create a PrivateBinUrl instance from a URL-like object.
+
+        Parameters
+        ----------
+        url : str | PrivateBinUrl
+            A PrivateBin URL-like object.
+        delete_token : str
+            The delete token. Authorizes deletion of the paste.
+
+        Returns
+        -------
+        Self
+
+        Raises
+        ------
+        ValueError
+            If the provided `url` is not in the expected format.
+        TypeError
+            If the provided `url` is not the expected type.
+
+        """
+        match url:
+            case str():
+                url = PrivateBinUrl.parse(url)
+                return cls(
+                    server=url.server,
+                    id=url.id,
+                    passphrase=url.passphrase,
+                    delete_token=delete_token,
+                )
+            case PrivateBinUrl():
+                return cls(
+                    server=url.server,
+                    id=url.id,
+                    passphrase=url.passphrase,
+                    delete_token=delete_token,
+                )
+            case _:
+                msg = (
+                    f"Expected 'url' to be of type 'str' or 'PrivateBinUrl', "
+                    f"but got {type(url).__name__!r}."
+                )
+                raise TypeError(msg)
