@@ -565,7 +565,7 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
 
 
 class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
-    """Represents a parsed PrivateBin URL, including its components and delete token."""
+    """Represents a readable PrivateBin URL."""
 
     server: str
     """The base server URL of the PrivateBin instance."""
@@ -573,20 +573,18 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
     """The unique paste ID. This identifies the specific paste on the server."""
     passphrase: str
     """The decryption passphrase. This is needed to decrypt and view encrypted pastes."""
-    delete_token: str
-    """The delete token. Authorizes deletion of the paste."""
 
-    def to_str(self) -> str:
+    def unmask(self) -> str:
         """
         Explicitly convert the instance into a complete, unmasked URL string.
 
         This method behaves differently from implicit Python string conversions
         like `print(url)`, or f-strings (`f"{url}"`).
 
-        -  `to_str()` returns the full, unmasked URL with the sensitive passphrase.
+        -  `unmask()` returns the full, unmasked URL with the sensitive passphrase.
         -  Implicit conversions (`print()`, f-strings, etc.) return a masked URL for safety.
 
-        Call `to_str()` when you explicitly need the full, working URL, for example, to:
+        Call `unmask()` when you explicitly need the full, working URL, for example, to:
 
         -  Open the URL in a browser.
         -  Pass the URL to a function that requires the unmasked passphrase.
@@ -599,7 +597,7 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         Examples
         --------
         >>> url = PrivateBinUrl(server="https://example.privatebin.com/", id="pasteid", passphrase="secret", delete_token="deltoken")
-        >>> url.to_str()
+        >>> url.unmask()
         'https://example.privatebin.com/?pasteid#secret'
         >>> print(url)  # Implicit string conversion - masked URL
         'https://example.privatebin.com/?pasteid#********'
@@ -617,7 +615,7 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         Parameters
         ----------
         data : str
-            JSON string representing the PrivateBinUrl instance.
+            JSON string representing a PrivateBinUrl.
 
         Returns
         -------
@@ -646,12 +644,12 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         -----
         This method includes the sensitive `passphrase` in the JSON output.
         It also adds an extra field named `"url"` to the JSON, which is not part of
-        `PrivateBinUrl` but is generated using the `to_str()` method for convenience.
+        `PrivateBinUrl` but is generated using the `unmask()` method for convenience.
 
         """
         basic = msgspec.to_builtins(self)
         # Add the full URL to the JSON output
-        basic["url"] = self.to_str()
+        basic["url"] = self.unmask()
         jsonified = msgspec.json.encode(basic).decode()
         return msgspec.json.format(jsonified, indent=indent)
 
@@ -669,12 +667,12 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
 
         Examples
         --------
-        >>> url = PrivateBinUrl(server="https://example.com/privatebin", id="pasteid", passphrase="secret", delete_token="deltoken")
+        >>> url = PrivateBinUrl(server="https://example.privatebin.com", id="pasteid", passphrase="secret", delete_token="deltoken")
         >>> str(url)
-        'https://example.com/privatebin/?pasteid#********'
+        'https://example.privatebin.com/?pasteid#********'
 
         """
-        return self.to_str().replace(self.passphrase, "********")
+        return self.unmask().replace(self.passphrase, "********")
 
     def __repr__(self) -> str:
         """
