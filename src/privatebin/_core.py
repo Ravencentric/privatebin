@@ -16,6 +16,7 @@ from privatebin._models import (
     AuthenticatedData,
     Paste,
     PasteJsonLD,
+    PasteReceipt,
     PrivateBinUrl,
     RawPasteContent,
 )
@@ -201,7 +202,7 @@ class PrivateBin:
         expiration: Expiration = Expiration.ONE_WEEK,
         formatter: Formatter = Formatter.PLAIN_TEXT,
         compression: Compression = Compression.ZLIB,
-    ) -> PrivateBinUrl:
+    ) -> PasteReceipt:
         """
         Create a new paste on PrivateBin.
 
@@ -227,9 +228,9 @@ class PrivateBin:
 
         Returns
         -------
-        PrivateBinUrl
-            A `PrivateBinUrl` object containing the URL to access the newly created paste,
-            including the decryption passphrase and delete token.
+        PasteReceipt
+            A `PasteReceipt` object containing the URL to access the newly created paste,
+            and the delete token.
 
         Raises
         ------
@@ -244,9 +245,9 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as client:
-            paste_url = client.create("Hello, PrivateBin!")
-            print(f"Paste created at: {paste_url}")
+        with PrivateBin() as pb:
+            paste = pb.create("Hello, PrivateBin!")
+            print(f"Paste created at: {paste.url}")
         ```
 
         Create a paste with Markdown formatting and burn-after-reading:
@@ -254,13 +255,13 @@ class PrivateBin:
         ```python
         from privatebin import Formatter, PrivateBin
 
-        with PrivateBin() as client:
-            md_paste_url = client.create(
-                text="# Markdown Content\\n\\nThis is **markdown** formatted text.",
+        with PrivateBin() as pb:
+            paste = pb.create(
+                text="This *is* **markdown** formatted text.",
                 formatter=Formatter.MARKDOWN,
                 burn_after_reading=True
             )
-            print(f"Markdown paste URL: {md_paste_url}")
+            print(f"Markdown paste URL: {paste.url}")
         ```
 
         Create a password-protected paste with an attachment:
@@ -268,15 +269,16 @@ class PrivateBin:
         ```python
         from privatebin import Attachment, PrivateBin
 
-        with PrivateBin() as client:
+        with PrivateBin() as pb:
             attachment = Attachment.from_file("path/to/your/file.txt")
-            password_paste_url = client.create(
+            paste = pb.create(
                 text="This paste has a password and an attachment.",
                 password="supersecret",
                 attachment=attachment
             )
-            print(f"Password-protected paste URL: {password_paste_url}")
+            print(f"Password-protected paste URL: {paste.url}")
         ```
+
 
         """
         # Early error if both burn_after_reading and open_discussion are True
@@ -339,10 +341,12 @@ class PrivateBin:
             msg = response.get("message", "Failed to create paste.")
             raise PrivateBinError(msg)
 
-        return PrivateBinUrl(
-            server=self.server,
-            id=response["id"],
-            passphrase=base58.b58encode(passphrase).decode(),
+        return PasteReceipt(
+            url=PrivateBinUrl(
+                server=self.server,
+                id=response["id"],
+                passphrase=base58.b58encode(passphrase).decode(),
+            ),
             delete_token=response["deletetoken"],
         )
 
@@ -367,13 +371,11 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as client:
-            paste_url = client.create(text="This paste will be deleted.")
-            print(f"Paste URL: {paste_url}")
-            delete_id = paste_url.id
-            delete_token = paste_url.delete_token
-            client.delete(id=delete_id, delete_token=delete_token)
-            print(f"Paste with ID '{delete_id}' deleted.")
+        with PrivateBin() as pb:
+            paste = pb.create(text="This paste will be deleted.")
+            print(f"Paste URL: {paste.url}")
+            pb.delete(id=paste.url.id, delete_token=paste.delete_token)
+            print(f"Paste with ID '{paste.url.id}' deleted.")
         ```
 
         """

@@ -78,6 +78,7 @@ extend-select = [
     "TC",   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
 ]
 fixable = ["ALL"]
+ignore= ["UP038"]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["msgspec.Struct"]

@@ -21,13 +21,11 @@ if TYPE_CHECKING:
             server="https://privatebin.net/",
             id="8ed8eb3736994f7d",
             passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-            delete_token="blah",
         ),
         PrivateBinUrl(
             server="https://0.0g.gg/",
             id="8ed8eb3736994f7d",
             passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-            delete_token="blah",
         ),
     ),
     ids=repr,
@@ -89,7 +87,6 @@ def test_wrapper_get_errors() -> None:
                 server="https://privatebin.net/",
                 id="8ed8eb3736994f7d",
                 passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-                delete_token="blah",
             ),
             "https://privatebin.net/",
         ),
@@ -98,7 +95,6 @@ def test_wrapper_get_errors() -> None:
                 server="https://0.0g.gg/",
                 id="8ed8eb3736994f7d",
                 passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-                delete_token="blah",
             ),
             "https://0.0g.gg/",
         ),
@@ -109,10 +105,10 @@ def test_wrapper_create(server: str | PrivateBinUrl, expected: str, httpx_mock: 
     httpx_mock.add_response(
         json={"status": 0, "id": "123456789", "url": "/?123456789", "deletetoken": "token"}
     )
-    url = privatebin.create("Hello World!", server=server)
-    assert url.id == "123456789"
-    assert url.server == expected
-    assert url.delete_token == "token"
+    paste = privatebin.create("Hello World!", server=server)
+    assert paste.url.id == "123456789"
+    assert paste.url.server == expected
+    assert paste.delete_token == "token"
 
 
 def test_wrapper_create_errors() -> None:
@@ -135,13 +131,11 @@ def test_wrapper_create_errors() -> None:
             server="https://privatebin.net/",
             id="8ed8eb3736994f7d",
             passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-            delete_token="token",
         ),
         PrivateBinUrl(
             server="https://0.0g.gg/",
             id="8ed8eb3736994f7d",
             passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
-            delete_token="token",
         ),
     ),
     ids=repr,

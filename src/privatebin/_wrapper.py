@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from privatebin._core import PrivateBin
 from privatebin._enums import Compression, Expiration, Formatter
-from privatebin._models import Attachment, Paste, PrivateBinUrl
+from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
 
 
 def get(url: str | PrivateBinUrl, *, password: str | None = None) -> Paste:
@@ -84,7 +84,7 @@ def create(  # noqa: PLR0913
     expiration: Expiration = Expiration.ONE_WEEK,
     formatter: Formatter = Formatter.PLAIN_TEXT,
     compression: Compression = Compression.ZLIB,
-) -> PrivateBinUrl:
+) -> PasteReceipt:
     """
     Create a new paste on PrivateBin.
 
@@ -112,9 +112,9 @@ def create(  # noqa: PLR0913
 
     Returns
     -------
-    PrivateBinUrl
-        A `PrivateBinUrl` object containing the URL to access the newly created paste,
-        including the decryption passphrase and delete token.
+    PasteReceipt
+        A `PasteReceipt` object containing the URL to access the newly created paste,
+        and the delete token.
 
     Raises
     ------
@@ -129,8 +129,8 @@ def create(  # noqa: PLR0913
     Create a simple paste on the default PrivateBin instance:
 
     ```python
-    paste_url = privatebin.create("Hello, PrivateBin!")
-    print(f"Paste URL: {paste_url}")
+    paste_receipt = privatebin.create("Hello, PrivateBin!")
+    print(f"Paste URL: {paste_receipt.url}")
     ```
 
     Create a paste on a custom PrivateBin server with Markdown formatting and burn-after-reading:
@@ -139,13 +139,13 @@ def create(  # noqa: PLR0913
     import privatebin
     from privatebin import Formatter
 
-    md_paste_url = privatebin.create(
-        text="# Markdown Content\\n\\nThis is **markdown** formatted text.",
+    md_paste_receipt = privatebin.create(
+        text="# Markdown Content\n\nThis is **markdown** formatted text.",
         server="https://myprivatebin.example.org/",
         formatter=Formatter.MARKDOWN,
         burn_after_reading=True
     )
-    print(f"Markdown paste URL: {md_paste_url}")
+    print(f"Markdown paste URL: {md_paste_receipt.url}")
     ```
 
     Create a password-protected paste with an attachment:
@@ -156,13 +156,14 @@ def create(  # noqa: PLR0913
 
     attachment = Attachment.from_file("path/to/your/file.txt")
 
-    password_paste_url = privatebin.create(
+    password_paste_receipt = privatebin.create(
         text="This paste has a password and an attachment.",
         password="supersecret",
         attachment=attachment
     )
 
-    print(f"Password-protected paste URL: {password_paste_url}")
+    print(f"Password-protected paste URL: {password_paste_receipt.url}")
+```
     ```
 
     """
@@ -217,9 +218,9 @@ def delete(url: str | PrivateBinUrl, *, delete_token: str) -> None:
     ```python
     import privatebin
 
-    paste_url = privatebin.create(text="This paste will be deleted.")
-    privatebin.delete(paste_url, delete_token=paste_url.delete_token)
-    print(f"Paste with URL '{delete_url}' deleted.")
+    paste_receipt = privatebin.create(text="This paste will be deleted.")
+    privatebin.delete(paste_receipt.url, delete_token=paste_receipt.delete_token)
+    print(f"Paste with URL '{paste_receipt.url}' deleted.")
     ```
 
     """

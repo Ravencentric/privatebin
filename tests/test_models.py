@@ -98,11 +98,10 @@ def test_privatebin_url_json_roundtrip() -> None:
         server="https://privatebin.net/",
         id="abcdef",
         passphrase="secret",
-        delete_token="token",
     )
 
     assert (
         url.to_json(indent=0)
-        == '{"server": "https://privatebin.net/", "id": "abcdef", "passphrase": "secret", "delete_token": "token", "url": "https://privatebin.net/?abcdef#secret"}'
+        == '{"server": "https://privatebin.net/", "id": "abcdef", "passphrase": "secret", "url": "https://privatebin.net/?abcdef#secret"}'
     )
     assert PrivateBinUrl.from_json(url.to_json()) == url
