@@ -237,6 +237,8 @@ class PrivateBin:
         PrivateBinError
             - If `burn_after_reading` and `open_discussion` are both set to `True`.
             - If there is an error during paste creation on PrivateBin.
+        TypeError
+            If provided 'text' is not a `str`.
 
         Examples
         --------
@@ -279,8 +281,11 @@ class PrivateBin:
             print(f"Password-protected paste URL: {paste.url}")
         ```
 
-
         """
+        if not isinstance(text, str):
+            msg = f"Parameter 'text' expected str, got {type(text).__name__}."
+            raise TypeError(msg)
+
         # Early error if both burn_after_reading and open_discussion are True
         if burn_after_reading and open_discussion:
             msg = (

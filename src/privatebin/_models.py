@@ -572,6 +572,57 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         """
         return urljoin(self.server, f"/?{self.id}#{self.passphrase}")
 
+    @classmethod
+    def parse(cls, url: str | PrivateBinUrl | PasteReceipt, /) -> Self:
+        """
+        Parse a URL-like object into a `PrivateBinUrl` instance.
+
+        Parameters
+        ----------
+        url : str | PrivateBinUrl | PasteReceipt
+            The URL-like object to parse.
+
+        Returns
+        -------
+        Self
+
+        Raises
+        ------
+        ValueError
+            If the URL string has an invalid format.
+        TypeError
+            If the input is not a `str` or `PrivateBinUrl` object.
+
+        """
+        match url:
+            case str():
+                try:
+                    server, id_passphrase = url.strip().split("?")
+                    id, passphrase = id_passphrase.split("#")
+
+                    # The leading hyphen is a visual cue for "burn-after-reading" pastes.
+                    # This code removes it because it's not part of the actual passphrase
+                    # and would cause decryption to fail. Removing it also ensures that
+                    # pastes with and without the hyphen are treated as identical.
+                    passphrase = passphrase.removeprefix("-")
+
+                    return cls(server=server, id=id, passphrase=passphrase)
+                except ValueError:
+                    msg = (
+                        "Invalid PrivateBin URL format. "
+                        "URL should be like: https://examplebin.net/?pasteid#passphrase. "
+                        f"Got: {url!r}"
+                    )
+                    raise ValueError(msg) from None
+            case PrivateBinUrl():
+                return cls(server=url.server, id=url.id, passphrase=url.passphrase)
+            case PasteReceipt():
+                url = url.url
+                return cls(server=url.server, id=url.id, passphrase=url.passphrase)
+            case _:
+                msg = f"Expected `str` or `PrivateBinUrl`, got {type(url).__name__!r}."
+                raise TypeError(msg)
+
     def __str__(self) -> str:
         """
         Return a URL-like string representation that is safe to print or log.
