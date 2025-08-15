@@ -18,8 +18,16 @@ def test_create(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
     assert paste.url.server == "https://privatebin.net/"
     assert paste.url.id == "123456789"
     assert paste.delete_token == "token"
-    # assert str(paste) == "https://privatebin.net/?123456789#********"
-    # assert repr(paste) == "https://privatebin.net/?123456789#********"
+    assert str(paste.url) == "https://privatebin.net/?123456789#********"
+    assert (
+        repr(paste.url)
+        == "PrivateBinUrl(server='https://privatebin.net/', id='123456789', passphrase='********')"
+    )
+    assert (
+        repr(paste)
+        == str(paste)
+        == "PasteReceipt(url=PrivateBinUrl(server='https://privatebin.net/', id='123456789', passphrase='********'), delete_token='********')"
+    )
 
 
 def test_create_with_attachment(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:
@@ -31,8 +39,16 @@ def test_create_with_attachment(pbin_client: PrivateBin, httpx_mock: HTTPXMock) 
     assert paste.url.server == "https://privatebin.net/"
     assert paste.url.id == "123456789"
     assert paste.delete_token == "token"
-    # assert str(url) == "https://privatebin.net/?123456789#********"
-    # assert repr(url) == "https://privatebin.net/?123456789#********"
+    assert str(paste.url) == "https://privatebin.net/?123456789#********"
+    assert (
+        repr(paste.url)
+        == "PrivateBinUrl(server='https://privatebin.net/', id='123456789', passphrase='********')"
+    )
+    assert (
+        repr(paste)
+        == str(paste)
+        == "PasteReceipt(url=PrivateBinUrl(server='https://privatebin.net/', id='123456789', passphrase='********'), delete_token='********')"
+    )
 
 
 def test_create_error(pbin_client: PrivateBin, httpx_mock: HTTPXMock) -> None:

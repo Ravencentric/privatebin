@@ -14,6 +14,7 @@ from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_json
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from os import PathLike
 
     from typing_extensions import NotRequired, Self
@@ -370,7 +371,46 @@ class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
         return msgspec.convert(response, cls, strict=False)
 
 
-class Attachment(msgspec.Struct, frozen=True, kw_only=True):
+class JsonStruct(msgspec.Struct, frozen=True, kw_only=True):
+    @classmethod
+    def from_json(cls, data: str, /) -> Self:
+        """
+        Create an instance of this class from a JSON string.
+
+        Parameters
+        ----------
+        data : str
+            JSON string representing the Paste instance.
+
+        Returns
+        -------
+        Self
+
+        """
+        return msgspec.json.decode(data, type=cls)
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize this instance into a JSON string.
+
+        Parameters
+        ----------
+        indent : int, optional
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
+            or negative to minimize size by removing extra whitespace.
+
+        Returns
+        -------
+        str
+            JSON string representing the Paste.
+
+        """
+        jsonified = msgspec.json.encode(self)
+        return msgspec.json.format(jsonified, indent=indent).decode()
+
+
+class Attachment(JsonStruct, frozen=True, kw_only=True):
     """Represents an attachment with its content and name."""
 
     name: str
@@ -469,46 +509,8 @@ class Attachment(msgspec.Struct, frozen=True, kw_only=True):
         mimetype = guess_mime_type(self.name)
         return f"data:{mimetype};base64,{encoded}"
 
-    @classmethod
-    def from_json(cls, data: str, /) -> Self:
-        """
-        Create an Attachment instance from a JSON string.
 
-        Parameters
-        ----------
-        data : str
-            JSON string representing the Attachment instance.
-
-        Returns
-        -------
-        Self
-
-        """
-        return msgspec.json.decode(data, type=cls)
-
-    def to_json(self, *, indent: int = 2) -> str:
-        """
-        Serialize the Attachment instance into a JSON string.
-        The `content` (binary data) will be a base64 encoded string in the JSON output.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
-
-        Returns
-        -------
-        str
-            JSON string representing the Attachment.
-
-        """
-        jsonified = msgspec.json.encode(self).decode()
-        return msgspec.json.format(jsonified, indent=indent)
-
-
-class Paste(msgspec.Struct, frozen=True, kw_only=True):
+class Paste(JsonStruct, frozen=True, kw_only=True):
     """Represents a PrivateBin paste."""
 
     id: str
@@ -526,45 +528,8 @@ class Paste(msgspec.Struct, frozen=True, kw_only=True):
     time_to_live: timedelta | None
     """Time duration for which the paste is set to be stored, if any."""
 
-    @classmethod
-    def from_json(cls, data: str, /) -> Self:
-        """
-        Create an Paste instance from a JSON string.
 
-        Parameters
-        ----------
-        data : str
-            JSON string representing the Paste instance.
-
-        Returns
-        -------
-        Self
-
-        """
-        return msgspec.json.decode(data, type=cls)
-
-    def to_json(self, *, indent: int = 2) -> str:
-        """
-        Serialize the Paste instance into a JSON string.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
-
-        Returns
-        -------
-        str
-            JSON string representing the Paste.
-
-        """
-        jsonified = msgspec.json.encode(self).decode()
-        return msgspec.json.format(jsonified, indent=indent)
-
-
-class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
+class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
     """Represents a PrivateBin URL."""
 
     server: str
@@ -576,7 +541,7 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
 
     def unmask(self) -> str:
         """
-        Explicitly convert the instance into a complete, unmasked URL string.
+        Explicitly convert this instance into a complete, unmasked URL string.
 
         This method behaves differently from implicit Python string conversions
         like `print(url)`, or f-strings (`f"{url}"`).
@@ -597,73 +562,21 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
         Examples
         --------
         >>> url = PrivateBinUrl(server="https://example.privatebin.com/", id="pasteid", passphrase="secret")
-        >>> url.unmask()
-        'https://example.privatebin.com/?pasteid#secret'
         >>> print(url)  # Implicit string conversion - masked URL
         'https://example.privatebin.com/?pasteid#********'
         >>> f"{url}"  # Implicit string conversion in f-string - masked URL
         'https://example.privatebin.com/?pasteid#********'
+        >>> url.unmask()
+        'https://example.privatebin.com/?pasteid#secret'
 
         """
         return urljoin(self.server, f"/?{self.id}#{self.passphrase}")
 
-    @classmethod
-    def from_json(cls, data: str, /) -> Self:
-        """
-        Create an PrivateBinUrl instance from a JSON string.
-
-        Parameters
-        ----------
-        data : str
-            JSON string representing the PrivateBinUrl instance.
-
-        Returns
-        -------
-        Self
-
-        """
-        return msgspec.json.decode(data, type=cls)
-
-    def to_json(self, *, indent: int = 2) -> str:
-        """
-        Serialize the PrivateBinUrl instance into a JSON string.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
-
-        Returns
-        -------
-        str
-            JSON string representing the PrivateBinUrl.
-
-        Notes
-        -----
-        This method includes the sensitive `passphrase` in the JSON output.
-        It also adds an extra field named `"url"` to the JSON, which is not part of
-        `PrivateBinUrl` but is generated using the `unmask()` method for convenience.
-
-        """
-        basic = msgspec.to_builtins(self)
-        # Add the full URL to the JSON output
-        basic["url"] = self.unmask()
-        jsonified = msgspec.json.encode(basic).decode()
-        return msgspec.json.format(jsonified, indent=indent)
-
     def __str__(self) -> str:
         """
-        Return a URL string, masking the passphrase for security in logs.
-
-        Provides a string representation of the URL that is safe to print or log.
-        The decryption passphrase is replaced with `********` to prevent accidental exposure.
-
-        Returns
-        -------
-        str
-            A URL string with the passphrase replaced by `********`.
+        Return a URL-like string representation that is safe to print or log.
+        The decryption passphrase is replaced with `********`
+        to prevent accidental exposure.
 
         Examples
         --------
@@ -676,21 +589,48 @@ class PrivateBinUrl(msgspec.Struct, frozen=True, kw_only=True):
 
     def __repr__(self) -> str:
         """
-        Return a string representation of the PrivateBinUrl instance.
-
-        Returns
-        -------
-        str
-            A string representation of the `PrivateBinUrl` instance, with a masked passphrase.
-
+        Return a string representation that is safe to print or log.
+        The decryption passphrase is replaced with `********`
+        to prevent accidental exposure.
         """
-        return self.__str__()
+        return f"{self.__class__.__name__}(server={self.server!r}, id={self.id!r}, passphrase='********')"
+
+    def __rich_repr__(self) -> Iterator[tuple[object, object]]:  # pragma: no cover
+        """
+        Override the default [rich repr protocol][0] implemented by [msgspec.Struct][1]
+        to behave similarly to `__repr__`.
+
+        [0]: https://rich.readthedocs.io/en/stable/pretty.html#rich-repr-protocol
+        [1]: https://jcristharif.com/msgspec/structs.html
+        """
+        yield "server", self.server
+        yield "id", self.id
+        yield "passphrase", "********"
 
 
-class PasteReceipt(msgspec.Struct, frozen=True, kw_only=True):
+class PasteReceipt(JsonStruct, frozen=True, kw_only=True):
     """Represents the result of a paste creation."""
 
     url: PrivateBinUrl
     """The URL of the newly created paste."""
     delete_token: str
     """The token required to delete the paste."""
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation that is safe to print or log.
+        The decryption passphrase and the delete token are replaced
+        with `********` to prevent accidental exposure.
+        """
+        return f"{self.__class__.__name__}(url={self.url!r}, delete_token='********')"
+
+    def __rich_repr__(self) -> Iterator[tuple[object, object]]:  # pragma: no cover
+        """
+        Override the default [rich repr protocol][0] implemented by [msgspec.Struct][1]
+        to behave similarly to `__repr__`.
+
+        [0]: https://rich.readthedocs.io/en/stable/pretty.html#rich-repr-protocol
+        [1]: https://jcristharif.com/msgspec/structs.html
+        """
+        yield "url", self.url
+        yield "delete_token", "********"

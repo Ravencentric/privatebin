@@ -76,7 +76,7 @@ def create(  # noqa: PLR0913
             "code": Formatter.SOURCE_CODE,
         }
 
-        url = privatebin.create(
+        paste = privatebin.create(
             text=text.strip(),
             server=server,
             attachment=_attachment,
@@ -88,11 +88,11 @@ def create(  # noqa: PLR0913
 
         if json:
             if pretty:
-                rich.print_json(url.to_json())
+                rich.print_json(paste.to_json())
             else:
-                print(url.to_json())
+                print(paste.to_json())
         else:
-            print(url.to_str())
+            print(paste.url.unmask())
 
         return 0
 

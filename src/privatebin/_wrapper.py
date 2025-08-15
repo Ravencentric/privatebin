@@ -163,7 +163,6 @@ def create(  # noqa: PLR0913
     )
 
     print(f"Password-protected paste URL: {password_paste_receipt.url}")
-```
     ```
 
     """

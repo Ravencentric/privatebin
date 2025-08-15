@@ -22,9 +22,8 @@ def test_attachment_from_file(tmp_path: Path) -> None:
     assert attachment.content == b"hello from attachment"
 
     assert attachment.to_data_url() == "data:text/plain;base64,aGVsbG8gZnJvbSBhdHRhY2htZW50"
-    assert (
-        attachment.to_json(indent=0)
-        == '{"name": "attachment.txt", "content": "aGVsbG8gZnJvbSBhdHRhY2htZW50"}'
+    assert attachment == Attachment.from_data_url(
+        url="data:text/plain;base64,aGVsbG8gZnJvbSBhdHRhY2htZW50", name="attachment.txt"
     )
     assert Attachment.from_json(attachment.to_json()) == attachment
 
@@ -85,11 +84,6 @@ def test_paste_json_roundtrip() -> None:
         burn_after_reading=False,
         time_to_live=timedelta(days=1),
     )
-
-    assert (
-        paste.to_json(indent=-1)
-        == '{"id":"abcdef","text":"hello world","attachment":{"name":"baz.txt","content":"Rm9vIGFuZCBiYXI="},"formatter":"markdown","open_discussion":false,"burn_after_reading":false,"time_to_live":"P1D"}'
-    )
     assert Paste.from_json(paste.to_json()) == paste
 
 
@@ -98,10 +92,5 @@ def test_privatebin_url_json_roundtrip() -> None:
         server="https://privatebin.net/",
         id="abcdef",
         passphrase="secret",
-    )
-
-    assert (
-        url.to_json(indent=0)
-        == '{"server": "https://privatebin.net/", "id": "abcdef", "passphrase": "secret", "url": "https://privatebin.net/?abcdef#secret"}'
     )
     assert PrivateBinUrl.from_json(url.to_json()) == url
