@@ -87,11 +87,6 @@ class PrivateBin:
         """
         Get the base server URL of the PrivateBin instance.
 
-        Returns
-        -------
-        str
-            The base server URL as a string.
-
         Examples
         --------
         >>> client = PrivateBin()
@@ -129,13 +124,11 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as client:
-            paste = client.get(id="pasteid", passphrase="pastepassphrase")
+        with PrivateBin() as pb:
+            paste = pb.get(id="bba4c6ab99a416af", passphrase="secret")
             print(paste.text)
-            # Prints the decrypted paste text
             if paste.attachment:
                 print(f"Attachment name: {paste.attachment.name}")
-                # Access paste.attachment.content to get attachment bytes
         ```
 
         """
