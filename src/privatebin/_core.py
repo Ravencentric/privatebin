@@ -51,15 +51,9 @@ class PrivateBin:
         --------
         Basic usage to instantiate a PrivateBin client:
 
-        >>> client = PrivateBin()
-        >>> client.server
-        'https://privatebin.net/'
-
-        Using a context manager with a custom server:
-
         ```python
-        with PrivateBin(server="https://bin.disroot.org/") as client:
-            paste = client.get(id="pasteid", passphrase="pastepassphrase")
+        with PrivateBin() as client:
+            paste = client.get(id="pasteid", passphrase="secret")
             print(paste.text)
         ```
 
@@ -125,7 +119,7 @@ class PrivateBin:
         from privatebin import PrivateBin
 
         with PrivateBin() as pb:
-            paste = pb.get(id="bba4c6ab99a416af", passphrase="secret")
+            paste = pb.get(id="pasteid", passphrase="secret")
             print(paste.text)
             if paste.attachment:
                 print(f"Attachment name: {paste.attachment.name}")
@@ -276,7 +270,7 @@ class PrivateBin:
 
         """
         if not isinstance(text, str):
-            msg = f"Parameter 'text' expected str, got {type(text).__name__}."
+            msg = f"Parameter 'text' expected str, got {type(text).__name__!r}."
             raise TypeError(msg)
 
         # Early error if both burn_after_reading and open_discussion are True

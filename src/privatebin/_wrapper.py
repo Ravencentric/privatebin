@@ -13,7 +13,7 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
 
     Parameters
     ----------
-    url : str | PrivateBinUrl
+    url : str | PrivateBinUrl | PasteReceipt
         The URL of the PrivateBin paste.
     password : str, optional
         Password to decrypt the paste if it was created with one.
