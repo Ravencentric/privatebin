@@ -58,10 +58,12 @@ class Zlib:
         return decompressed
 
 
-def to_compact_json(obj: object) -> str:
+def to_compact_jsonb(obj: object) -> bytes:
     """
-    Serialize to a compact JSON (no whitespace in seperators)
-    for PrivateBin API compatibility and correct decryption.
+    Serialize a Python object to a compact UTF-8 encoded JSON byte string.
+
+    This format removes unnecessary whitespace in separators (`,` and `:`)
+    for compatibility with the PrivateBin API and to ensure correct decryption.
 
     Parameters
     ----------
@@ -70,8 +72,8 @@ def to_compact_json(obj: object) -> str:
 
     Returns
     -------
-    str
-        Compact JSON string representation.
+    bytes
+        A UTF-8 encoded, compact JSON representation of the object.
 
     """
     return json.dumps(
@@ -80,7 +82,7 @@ def to_compact_json(obj: object) -> str:
         # The default separators add unnecessary whitespace
         # which throws off the decryption later down the line.
         separators=(",", ":"),
-    )
+    ).encode()
 
 
 def guess_mime_type(filename: str) -> str:

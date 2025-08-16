@@ -20,7 +20,7 @@ from privatebin._models import (
     PrivateBinUrl,
     RawPasteContent,
 )
-from privatebin._utils import Zlib, to_compact_json
+from privatebin._utils import Zlib, to_compact_jsonb
 from privatebin._version import __version__
 
 if TYPE_CHECKING:
@@ -134,9 +134,9 @@ class PrivateBin:
         """
         encoded_password = password.encode() if password else b""
 
-        # Pastes that are set to `burn-after-reading`
-        # have a `-` prefix. This is not required for decryption,
-        # in fact, it breaks decryption.
+        # The leading hyphen is a visual cue for "burn-after-reading" pastes.
+        # This code removes it because it's not part of the actual passphrase
+        # and would cause decryption to fail.
         cleaned_passphrase = passphrase.removeprefix("-")
 
         # Passphrase is a base58 encoded string,
@@ -298,7 +298,7 @@ class PrivateBin:
             data["attachment"] = attachment.to_data_url()
             data["attachment_name"] = attachment.name
 
-        encoded_data = to_compact_json(data).encode()
+        encoded_data = to_compact_jsonb(data)
         compressed_data = (
             Zlib(encoded_data).compress() if compression is Compression.ZLIB else encoded_data
         )
@@ -324,7 +324,7 @@ class PrivateBin:
 
         payload = {
             "v": 2,
-            "adata": adata.to_tuple(),
+            "adata": adata.to_serializable_tuple(),
             "ct": base64.b64encode(encrypted).decode(),
             "meta": {"expire": expiration},
         }

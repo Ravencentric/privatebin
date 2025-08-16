@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from privatebin._utils import Zlib, guess_mime_type, to_compact_json
+from privatebin._utils import Zlib, guess_mime_type, to_compact_jsonb
 
 
 def test_zlib() -> None:
@@ -19,8 +19,8 @@ def test_to_compact_json() -> None:
     ]
 
     assert (
-        to_compact_json(data)
-        == '[["EhGlr6MDIrNHFyhdMAE6gA==","wATfGNcSqjM=",100000,256,128,"aes","gcm","zlib"],"plaintext",0,0]'
+        to_compact_jsonb(data)
+        == b'[["EhGlr6MDIrNHFyhdMAE6gA==","wATfGNcSqjM=",100000,256,128,"aes","gcm","zlib"],"plaintext",0,0]'
     )
 
 

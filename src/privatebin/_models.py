@@ -11,7 +11,7 @@ import msgspec
 
 from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
-from privatebin._utils import guess_mime_type, to_compact_json
+from privatebin._utils import guess_mime_type, to_compact_jsonb
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -214,7 +214,7 @@ class AuthenticatedData(NamedTuple):
             burn_after_reading=burn_after_reading,
         )
 
-    def to_tuple(self) -> tuple[tuple[object, ...], str, int, int]:
+    def to_serializable_tuple(self) -> tuple[tuple[object, ...], str, int, int]:
         """
         Convert to a basic tuple that can be serialized to JSON.
         It base64 encodes byte-like cipher parameters for safe transport in JSON
@@ -225,12 +225,12 @@ class AuthenticatedData(NamedTuple):
         tuple[tuple[object, ...], str, int, int]
 
         """
-        cipher_parameters = [
+        cipher_parameters = tuple(
             base64.b64encode(param).decode() if isinstance(param, bytes) else param
             for param in self.cipher_parameters
-        ]
+        )
         return (
-            tuple(cipher_parameters),
+            cipher_parameters,
             self.formatter,
             int(self.open_discussion),
             int(self.burn_after_reading),
@@ -246,7 +246,7 @@ class AuthenticatedData(NamedTuple):
             A JSON-encoded byte string representing the `AuthenticatedData` instance.
 
         """
-        return to_compact_json(self.to_tuple()).encode()
+        return to_compact_jsonb(self.to_serializable_tuple())
 
 
 class MetaData(msgspec.Struct, frozen=True, kw_only=True):
