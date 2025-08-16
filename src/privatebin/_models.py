@@ -589,9 +589,9 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         Raises
         ------
         ValueError
-            If the URL string has an invalid format.
+            If the provided 'url' string is not in the expected format.
         TypeError
-            If the input is not a `str` or `PrivateBinUrl` object.
+            If the provided 'url' is not in the expected type.
 
         """
         match url:
@@ -620,7 +620,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
                 url = url.url
                 return cls(server=url.server, id=url.id, passphrase=url.passphrase)
             case _:
-                msg = f"Expected `str` or `PrivateBinUrl`, got {type(url).__name__!r}."
+                msg = f"Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got {type(url).__name__!r}."
                 raise TypeError(msg)
 
     def __str__(self) -> str:

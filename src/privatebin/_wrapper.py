@@ -208,7 +208,7 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
         case str():
             parsed = urlparse(url)
             if not (parsed.scheme and parsed.netloc and parsed.query):
-                msg = f"Invalid URL {url!r}: missing one of scheme, network location, or paste ID."
+                msg = "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid#passphrase."
                 raise ValueError(msg)
             server = f"{parsed.scheme}://{parsed.netloc}"
             id = parsed.query

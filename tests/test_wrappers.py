@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 import privatebin
-from privatebin import PrivateBinUrl
+from privatebin import PasteReceipt, PrivateBinUrl
 
 if TYPE_CHECKING:
     from pytest_httpx import HTTPXMock
@@ -66,7 +66,10 @@ def test_wrapper_get(url: str | PrivateBinUrl, httpx_mock: HTTPXMock) -> None:
 
 
 def test_wrapper_get_errors() -> None:
-    with pytest.raises(TypeError, match="Expected str or PrivateBinUrl, got object."):
+    with pytest.raises(
+        TypeError,
+        match="Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'object'.",
+    ):
         privatebin.get(object())  # type: ignore[arg-type]
 
     with pytest.raises(
@@ -91,10 +94,13 @@ def test_wrapper_get_errors() -> None:
             "https://privatebin.net/",
         ),
         (
-            PrivateBinUrl(
-                server="https://0.0g.gg/",
-                id="8ed8eb3736994f7d",
-                passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
+            PasteReceipt(
+                url=PrivateBinUrl(
+                    server="https://0.0g.gg/",
+                    id="8ed8eb3736994f7d",
+                    passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
+                ),
+                delete_token="blah",
             ),
             "https://0.0g.gg/",
         ),
@@ -116,7 +122,8 @@ def test_wrapper_create_errors() -> None:
         privatebin.create(object())  # type: ignore[arg-type]
 
     with pytest.raises(
-        TypeError, match="Parameter 'server' expected str or PrivateBinUrl, got None."
+        TypeError,
+        match="Parameter 'server' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'NoneType'.",
     ):
         privatebin.create("hello", server=None)  # type: ignore[arg-type]
 
@@ -132,10 +139,13 @@ def test_wrapper_create_errors() -> None:
             id="8ed8eb3736994f7d",
             passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
         ),
-        PrivateBinUrl(
-            server="https://0.0g.gg/",
-            id="8ed8eb3736994f7d",
-            passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
+        PasteReceipt(
+            url=PrivateBinUrl(
+                server="https://0.0g.gg/",
+                id="8ed8eb3736994f7d",
+                passphrase="-5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
+            ),
+            delete_token="blah",
         ),
     ),
     ids=repr,
@@ -146,7 +156,10 @@ def test_wrapper_delete(url: str | PrivateBinUrl, httpx_mock: HTTPXMock) -> None
 
 
 def test_wrapper_delete_errors() -> None:
-    with pytest.raises(TypeError, match="Expected str or PrivateBinUrl, got object."):
+    with pytest.raises(
+        TypeError,
+        match="Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'object'.",
+    ):
         privatebin.delete(url=object(), delete_token="hello")  # type: ignore[arg-type]
 
     with pytest.raises(
