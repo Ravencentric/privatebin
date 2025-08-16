@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from privatebin._core import PrivateBin
 from privatebin._enums import Compression, Expiration, Formatter
 from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
@@ -44,7 +46,7 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
     ```python
     import privatebin
 
-    paste = privatebin.get("https://privatebin.net/?pasteid#passphrase", password="pastepassword")
+    paste = privatebin.get("https://privatebin.net/?pasteid#passphrase", password="secret")
     print(paste.text)
     ```
 
@@ -202,15 +204,23 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
     ```
 
     """
-    try:
-        url = PrivateBinUrl.parse(url)
-        server = url.server
-        id = url.id
-    except ValueError:
-        # If we hit this ValueError, it means the URL is a string
-        # but not in a format that's acceptable by PrivateBinUrl,
-        # which likely means it's missing the passphrase.
-        server, id = url.strip().removesuffix("#").split("?")  # type: ignore[union-attr]
+    match url:
+        case str():
+            parsed = urlparse(url)
+            if not (parsed.scheme and parsed.netloc and parsed.query):
+                msg = f"Invalid URL {url!r}: missing one of scheme, network location, or paste ID."
+                raise ValueError(msg)
+            server = f"{parsed.scheme}://{parsed.netloc}"
+            id = parsed.query
+        case PrivateBinUrl():
+            server = url.server
+            id = url.id
+        case PasteReceipt():
+            server = url.url.server
+            id = url.url.id
+        case _:
+            msg = f"Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got {type(url).__name__!r}."
+            raise TypeError(msg)
 
     with PrivateBin(server) as client:
         client.delete(id=id, delete_token=delete_token)
