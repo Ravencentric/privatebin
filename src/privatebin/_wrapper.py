@@ -157,7 +157,7 @@ def create(  # noqa: PLR0913
         case PasteReceipt():
             _server = server.url.server
         case _:
-            msg = f"Parameter 'server' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got {type(server).__name__!r}."
+            msg = f"Parameter 'server' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got {type(server).__name__!r}."
             raise TypeError(msg)
 
     with PrivateBin(_server) as client:
@@ -219,7 +219,7 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
             server = url.url.server
             id = url.url.id
         case _:
-            msg = f"Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got {type(url).__name__!r}."
+            msg = f"Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got {type(url).__name__!r}."
             raise TypeError(msg)
 
     with PrivateBin(server) as client:

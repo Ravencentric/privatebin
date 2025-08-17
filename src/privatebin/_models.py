@@ -620,7 +620,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
                 url = url.url
                 return cls(server=url.server, id=url.id, passphrase=url.passphrase)
             case _:
-                msg = f"Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got {type(url).__name__!r}."
+                msg = f"Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got {type(url).__name__!r}."
                 raise TypeError(msg)
 
     def __str__(self) -> str:

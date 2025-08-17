@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+from types import NoneType
 from typing import TYPE_CHECKING, Any
 
 import base58
@@ -20,7 +21,7 @@ from privatebin._models import (
     PrivateBinUrl,
     RawPasteContent,
 )
-from privatebin._utils import Zlib, to_compact_jsonb
+from privatebin._utils import Compressor, assert_type, to_compact_jsonb
 from privatebin._version import __version__
 
 if TYPE_CHECKING:
@@ -126,6 +127,10 @@ class PrivateBin:
         ```
 
         """
+        assert_type(id, str, param="id")
+        assert_type(passphrase, str, param="passphrase")
+        assert_type(password, (str, NoneType), param="password")
+
         encoded_password = password.encode() if password else b""
 
         # The leading hyphen is a visual cue for "burn-after-reading" pastes.
@@ -151,12 +156,7 @@ class PrivateBin:
             associated_data=paste.adata.to_bytes(),
         )
 
-        decompressed = (
-            Zlib(decrypted).decompress()
-            if cipher_parameters.compression is Compression.ZLIB
-            else decrypted
-        )
-
+        decompressed = Compressor(mode=cipher_parameters.compression).decompress(decrypted)
         finalized: RawPasteContent = json.loads(decompressed)
 
         try:
@@ -269,9 +269,12 @@ class PrivateBin:
         ```
 
         """
-        if not isinstance(text, str):
-            msg = f"Parameter 'text' expected str, got {type(text).__name__!r}."
-            raise TypeError(msg)
+        assert_type(text, str, param="text")
+        assert_type(attachment, (Attachment, NoneType), param="attachment")
+        assert_type(password, (str, NoneType), param="password")
+        assert_type(expiration, Expiration, param="expiration")
+        assert_type(formatter, Formatter, param="formatter")
+        assert_type(compression, Compression, param="compression")
 
         # Early error if both burn_after_reading and open_discussion are True
         if burn_after_reading and open_discussion:
@@ -293,9 +296,7 @@ class PrivateBin:
             data["attachment_name"] = attachment.name
 
         encoded_data = to_compact_jsonb(data)
-        compressed_data = (
-            Zlib(encoded_data).compress() if compression is Compression.ZLIB else encoded_data
-        )
+        compressed_data = Compressor(mode=compression).compress(encoded_data)
 
         adata = AuthenticatedData.new(
             initialization_vector=initialization_vector,
@@ -371,6 +372,9 @@ class PrivateBin:
         ```
 
         """
+        assert_type(id, str, param="id")
+        assert_type(delete_token, str, param="delete_token")
+
         payload = {"pasteid": id, "deletetoken": delete_token}
 
         # Success: {"status":0, "id": "[pasteID]"}

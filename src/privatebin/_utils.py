@@ -5,57 +5,46 @@ import mimetypes
 import sys
 import zlib
 
+from ._enums import Compression
 
-class Zlib:
-    """
-    Provides PrivateBin API compatibile zlib compression and decompression.
 
-    This class ensures data is compressed and decompressed using `wbits=-zlib.MAX_WBITS`,
-    omitting headers and checksums as required by the PrivateBin API.
-    """
+class Compressor:
+    """PrivateBin API compatibile compressor."""
 
-    def __init__(self, data: bytes) -> None:
-        """
-        Initialize Zlib with data.
+    def __init__(self, *, mode: Compression) -> None:
+        self.mode = mode
 
-        Parameters
-        ----------
-        data : bytes
-            The data to be compressed or decompressed.
+    def compress(self, data: bytes) -> bytes:
+        """Compress the input data."""
+        match self.mode:
+            case Compression.ZLIB:
+                # `wbits=-zlib.MAX_WBITS` is required by the PrivateBin API.
+                compressor = zlib.compressobj(wbits=-zlib.MAX_WBITS)
+                compressed = compressor.compress(data)
+                compressed += compressor.flush()
+                return compressed
+            case Compression.NONE:
+                return data
+            case _:
+                supported = ", ".join(f"{c.name!r}" for c in Compression)
+                msg = f"Unsupported compression mode: {self.mode!r}. Supported modes are: {supported}"
+                raise TypeError(msg)
 
-        """
-        self.data = data
-        self.wbits = -zlib.MAX_WBITS
-
-    def compress(self) -> bytes:
-        """
-        Return zlib compressed data.
-
-        Returns
-        -------
-        bytes
-            Compressed data.
-
-        """
-        compressor = zlib.compressobj(wbits=self.wbits)
-        compressed = compressor.compress(self.data)
-        compressed += compressor.flush()
-        return compressed
-
-    def decompress(self) -> bytes:
-        """
-        Return zlib decompressed data.
-
-        Returns
-        -------
-        bytes
-            Decompressed data.
-
-        """
-        decompressor = zlib.decompressobj(wbits=self.wbits)
-        decompressed = decompressor.decompress(self.data)
-        decompressed += decompressor.flush()
-        return decompressed
+    def decompress(self, data: bytes) -> bytes:
+        """Decompress the input data."""
+        match self.mode:
+            case Compression.ZLIB:
+                # `wbits=-zlib.MAX_WBITS` is required by the PrivateBin API.
+                decompressor = zlib.decompressobj(wbits=-zlib.MAX_WBITS)
+                decompressed = decompressor.decompress(data)
+                decompressed += decompressor.flush()
+                return decompressed
+            case Compression.NONE:
+                return data
+            case _:
+                supported = ", ".join(f"{c.name!r}" for c in Compression)
+                msg = f"Unsupported compression mode: {self.mode!r}. Supported modes are: {supported}"
+                raise TypeError(msg)
 
 
 def to_compact_jsonb(obj: object) -> bytes:
@@ -116,3 +105,18 @@ def guess_mime_type(filename: str) -> str:
     mimetype, _ = guesser(filename)
 
     return mimetype if mimetype else "application/octet-stream"
+
+
+def assert_type(
+    obj: object, typ: type[object] | tuple[type[object], ...], /, *, param: str
+) -> None:
+    """Shortcut for `isinstance(obj, type)` with a nice error message."""
+    if not isinstance(obj, typ):
+        if isinstance(typ, tuple):
+            types = ", ".join(f"{item.__name__!r}" for item in typ)
+            expected = f"one of the following types: {types}"
+        else:
+            expected = f"{typ.__name__!r}"
+
+        msg = f"Parameter '{param}' expected {expected}, but got {type(obj).__name__!r}."
+        raise TypeError(msg)

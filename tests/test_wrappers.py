@@ -68,7 +68,7 @@ def test_wrapper_get(url: str | PrivateBinUrl, httpx_mock: HTTPXMock) -> None:
 def test_wrapper_get_errors() -> None:
     with pytest.raises(
         TypeError,
-        match="Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'object'.",
+        match="Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'object'.",
     ):
         privatebin.get(object())  # type: ignore[arg-type]
 
@@ -118,12 +118,12 @@ def test_wrapper_create(server: str | PrivateBinUrl, expected: str, httpx_mock: 
 
 
 def test_wrapper_create_errors() -> None:
-    with pytest.raises(TypeError, match="Parameter 'text' expected str, got object."):
+    with pytest.raises(TypeError, match="Parameter 'text' expected 'str', but got 'object'."):
         privatebin.create(object())  # type: ignore[arg-type]
 
     with pytest.raises(
         TypeError,
-        match="Parameter 'server' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'NoneType'.",
+        match="Parameter 'server' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'NoneType'.",
     ):
         privatebin.create("hello", server=None)  # type: ignore[arg-type]
 
@@ -158,7 +158,7 @@ def test_wrapper_delete(url: str | PrivateBinUrl, httpx_mock: HTTPXMock) -> None
 def test_wrapper_delete_errors() -> None:
     with pytest.raises(
         TypeError,
-        match="Parameter 'url' expected `str`, `PrivateBinUrl`, or `PasteReceipt`, got 'object'.",
+        match="Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'object'.",
     ):
         privatebin.delete(url=object(), delete_token="hello")  # type: ignore[arg-type]
 
