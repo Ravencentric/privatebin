@@ -20,11 +20,11 @@ cat secret.txt | privatebin create
 ## Get a paste
 
 ```bash
-privatebin get "https://privatebin.net/?pasteid#key"
+privatebin get "https://privatebin.net/?pasteid#passphrase"
 ```
 
 ## Delete a paste
 
 ```bash
-privatebin delete "https://privatebin.net/?pasteid#key" --token "your_delete_token"
+privatebin delete "https://privatebin.net/?pasteid" --token "your_delete_token"
 ```
