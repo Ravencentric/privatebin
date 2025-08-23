@@ -1,6 +1,6 @@
 [project]
 name = "privatebin"
-version = "0.2.1"
+version = "0.3.0"
 description = "Python library for interacting with PrivateBin's v2 API (PrivateBin >= 1.3) to create, retrieve, and delete encrypted pastes."
 authors = [{ name = "Ravencentric", email = "me@ravencentric.cc" }]
 readme = "README.md"
