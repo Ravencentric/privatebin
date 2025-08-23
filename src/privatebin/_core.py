@@ -59,6 +59,7 @@ class PrivateBin:
         ```
 
         """
+        assert_type(server, str, param="server")
         self._server = server
         self._client = (
             httpx.Client(
