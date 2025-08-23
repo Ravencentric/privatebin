@@ -204,23 +204,17 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
     ```
 
     """
-    match url:
-        case str():
-            parsed = urlparse(url)
-            if not (parsed.scheme and parsed.netloc and parsed.query):
-                msg = "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid#passphrase."
-                raise ValueError(msg)
-            server = f"{parsed.scheme}://{parsed.netloc}"
-            id = parsed.query
-        case PrivateBinUrl():
-            server = url.server
-            id = url.id
-        case PasteReceipt():
-            server = url.url.server
-            id = url.url.id
-        case _:
-            msg = f"Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got {type(url).__name__!r}."
-            raise TypeError(msg)
+    if isinstance(url, str):
+        parsed = urlparse(url)
+        if not (parsed.scheme and parsed.netloc and parsed.query):
+            msg = "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid."
+            raise ValueError(msg)
+        server = f"{parsed.scheme}://{parsed.netloc}"
+        id = parsed.query
+    else:
+        url = PrivateBinUrl.parse(url)
+        server = url.server
+        id = url.id
 
     with PrivateBin(server) as client:
         client.delete(id=id, delete_token=delete_token)

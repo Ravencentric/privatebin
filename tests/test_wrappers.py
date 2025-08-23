@@ -165,7 +165,7 @@ def test_wrapper_delete_errors() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid#passphrase"
+            "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid"
         ),
     ):
         privatebin.delete("whoops", delete_token="hello")
