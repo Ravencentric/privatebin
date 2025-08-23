@@ -40,7 +40,7 @@ Python library for interacting with PrivateBin's v2 API (PrivateBin >= 1.3) to c
 
 ## Docs
 
-Checkout the [quick start page](https://privatebin.ravencentric.cc/quick-start/) and the [API reference](https://privatebin.ravencentric.cc/api-reference/client/).
+Checkout the [quick start page](https://ravencentric.cc/privatebin/quick-start/) and the [API reference](https://ravencentric.cc/privatebin/api-reference/client/).
 
 ## License
 
