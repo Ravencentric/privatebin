@@ -27,14 +27,16 @@ from privatebin._version import __version__
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from privatebin._protocols import HttpClientProtocol
+
 
 class PrivateBin:
     def __init__(
         self,
         server: str = "https://privatebin.net/",
         *,
-        client: httpx.Client | None = None,
-    ):
+        client: HttpClientProtocol | None = None,
+    ) -> None:
         """
         Client for interacting with PrivateBin's v2 API (PrivateBin >= 1.3).
 
@@ -42,11 +44,9 @@ class PrivateBin:
         ----------
         server : str, optional
             The base URL of the PrivateBin server.
-        client : httpx.Client, optional
-            An existing [`httpx.Client`][httpx.Client] instance to be used for requests.
-            If `None`, a new client is created.
-
-            [httpx.Client]: https://www.python-httpx.org/api/#client
+        client : HttpClientProtocol | None, optional
+            An existing HTTP client instance to be used for requests.
+            If `None`, a new `httpx.Client` is created.
 
         Examples
         --------
@@ -143,8 +143,9 @@ class PrivateBin:
         # so we need to decode it.
         decoded_passphrase = base58.b58decode(cleaned_passphrase)
 
-        response = self._client.get(self.server, params=id).raise_for_status().json()
-        paste = PasteJsonLD.from_response(response)
+        response = self._client.get(self.server, params=id)
+        response.raise_for_status()
+        paste = PasteJsonLD.from_response(response.json())
         cipher_parameters = paste.adata.cipher_parameters
 
         decrypted = decrypt(
@@ -327,9 +328,9 @@ class PrivateBin:
 
         # Success: {"status": 0, "id": "blah", "url": "/?blah", "deletetoken": "blah"}
         # Failure: {"status": 1, "message": "[errormessage]"}
-        response: dict[str, Any] = (
-            self._client.post(url=self.server, json=payload).raise_for_status().json()
-        )
+        posted = self._client.post(url=self.server, json=payload)
+        posted.raise_for_status()
+        response: dict[str, Any] = posted.json()
 
         if response.get("status") != 0:
             msg = response.get("message", "Failed to create paste.")
@@ -380,9 +381,9 @@ class PrivateBin:
 
         # Success: {"status":0, "id": "[pasteID]"}
         # Failure: {"status":1, "message": "[errormessage]"}
-        response: dict[str, Any] = (
-            self._client.post(self.server, json=payload).raise_for_status().json()
-        )
+        posted = self._client.post(self.server, json=payload)
+        posted.raise_for_status()
+        response: dict[str, Any] = posted.json()
 
         if response.get("status") != 0:
             msg = response.get("message", "Failed to delete paste.")

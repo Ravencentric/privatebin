@@ -70,7 +70,7 @@ def test_wrapper_get_errors() -> None:
         TypeError,
         match="Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'object'.",
     ):
-        privatebin.get(object())  # type: ignore[arg-type]
+        privatebin.get(object())  # pyrefly: ignore[bad-argument-type]
 
     with pytest.raises(
         ValueError,
@@ -119,13 +119,13 @@ def test_wrapper_create(server: str | PrivateBinUrl, expected: str, httpx_mock: 
 
 def test_wrapper_create_errors() -> None:
     with pytest.raises(TypeError, match="Parameter 'text' expected 'str', but got 'object'."):
-        privatebin.create(object())  # type: ignore[arg-type]
+        privatebin.create(object())  # pyrefly: ignore[bad-argument-type]
 
     with pytest.raises(
         TypeError,
         match="Parameter 'server' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'NoneType'.",
     ):
-        privatebin.create("hello", server=None)  # type: ignore[arg-type]
+        privatebin.create("hello", server=None)  # pyrefly: ignore[bad-argument-type]
 
 
 @pytest.mark.parametrize(
@@ -160,7 +160,7 @@ def test_wrapper_delete_errors() -> None:
         TypeError,
         match="Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'object'.",
     ):
-        privatebin.delete(url=object(), delete_token="hello")  # type: ignore[arg-type]
+        privatebin.delete(url=object(), delete_token="hello")  # pyrefly: ignore[bad-argument-type]
 
     with pytest.raises(
         ValueError,

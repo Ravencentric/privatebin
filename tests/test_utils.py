@@ -21,13 +21,13 @@ def test_bad_compression() -> None:
         TypeError,
         match="Unsupported compression mode: 'foobar'. Supported modes are: 'ZLIB', 'NONE'",
     ):
-        Compressor(mode="foobar").compress(b"Hello World!")  # type: ignore[arg-type]
+        Compressor(mode="foobar").compress(b"Hello World!")  # pyrefly: ignore[bad-argument-type]
 
     with pytest.raises(
         TypeError,
         match="Unsupported compression mode: 'foobar'. Supported modes are: 'ZLIB', 'NONE'",
     ):
-        Compressor(mode="foobar").decompress(b"Hello World!")  # type: ignore[arg-type]
+        Compressor(mode="foobar").decompress(b"Hello World!")  # pyrefly: ignore[bad-argument-type]
 
 
 def test_to_compact_json() -> None:

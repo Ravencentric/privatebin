@@ -2,83 +2,124 @@
 name = "privatebin"
 version = "0.3.0"
 description = "Python library for interacting with PrivateBin's v2 API (PrivateBin >= 1.3) to create, retrieve, and delete encrypted pastes."
-authors = [{ name = "Ravencentric", email = "me@ravencentric.cc" }]
 readme = "README.md"
-license = "MIT"
 requires-python = ">=3.10"
-keywords = ["paste", "privatebin", "pastebin"]
+license = "MIT"
+authors = [{ name = "Ravencentric", email = "me@ravencentric.cc" }]
+keywords = ["paste", "pastebin", "privatebin"]
 classifiers = [
-    "Intended Audience :: Developers",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Typing :: Typed",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Typing :: Typed",
 ]
 dependencies = [
-    "base58>=2.1.1",
-    "cryptography>=44.0.2",
-    "httpx>=0.28.1",
-    "msgspec>=0.19.0",
+  "base58>=2.1.1",
+  "cryptography>=44.0.2",
+  "httpx>=0.28.1",
+  "msgspec>=0.21.1",
 ]
 
 [project.urls]
-Repository = "https://github.com/Ravencentric/privatebin"
 Documentation = "https://ravencentric.cc/privatebin/"
-
-[project.optional-dependencies]
-cli = ["cyclopts>=3.10.0", "rich>=13.9.4"]
+Repository = "https://github.com/Ravencentric/privatebin"
 
 [project.scripts]
 privatebin = "privatebin.__main__:app"
 
+[project.optional-dependencies]
+cli = ["cyclopts>=3.10.0", "rich>=13.9.4"]
+
 [dependency-groups]
-docs = [
-    "mkdocs-autorefs>=1.4.1",
-    "mkdocs-material>=9.6.7",
-    "mkdocstrings[python]>=0.29.0",
-]
-lint = ["mypy>=1.15.0", "ruff>=0.11.0"]
-test = [
-    "coverage[toml]>=7.6.12",
-    "pytest>=8.3.5",
-    "pytest-httpx>=0.35.0",
-    "pytest-socket>=0.7.0",
-    "tomli>=2.2.1",
-]
 dev = [
-    { include-group = "docs" },
-    { include-group = "lint" },
-    { include-group = "test" },
+  { include-group = "docs" },
+  { include-group = "lint" },
+  { include-group = "test" },
+]
+docs = [
+  "mkdocs-autorefs>=1.4.1",
+  "mkdocs-material>=9.6.7",
+  "mkdocstrings[python]>=0.29.0",
+]
+lint = [
+  "httpx>=0.28.1",
+  "httpx2>=2.9.1",
+  "niquests>=3.20.1",
+  "pyrefly>=1.1.1",
+  "requests>=2.32.5",
+  "ruff>=0.11.0",
+  "types-requests>=2.33.0.20260712",
+  "typing-extensions>=4.14.1",
+]
+test = [
+  "coverage[toml]>=7.6.12",
+  "pytest>=8.3.5",
+  "pytest-httpx>=0.35.0",
+  "pytest-socket>=0.7.0",
+  "tomli>=2.2.1",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",  # Only used for type-hints
+]
+
+[tool.pyrefly]
+preset = "all"
+python-platform = "all"
+project-includes = ["src/**/*.py", "tests/**/*.py"]
+
+[tool.pyrefly.errors]
+# 3.10 doesn't have the @override decorator
+missing-override-decorator = false
+not-required-key-access = false
+explicit-any = false
+
+
+[tool.pytest.ini_options]
+addopts = [
+  "-ra",
+  "--showlocals",
+  "--strict-markers",
+  "--strict-config",
+  "--disable-socket",
+]
+filterwarnings = ["error"]
+log_cli_level = "INFO"
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 99
 
 [tool.ruff.lint]
 extend-select = [
-    "I",    # https://docs.astral.sh/ruff/rules/#isort-i
-    "DTZ",  # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
-    "RUF",  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
-    "UP",   # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "N",    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
-    "D4",   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
-    "B",    # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-    "FBT",  # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
-    "C4",   # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
-    "EM",   # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
-    "ISC",  # https://docs.astral.sh/ruff/rules/multi-line-implicit-string-concatenation/
-    "PIE",  # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
-    "RET",  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
-    "PL",   # https://docs.astral.sh/ruff/rules/#pylint-pl
-    "FURB", # https://docs.astral.sh/ruff/rules/#refurb-furb
-    "TC",   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
+  "I",  # https://docs.astral.sh/ruff/rules/#isort-i
+  "DTZ",  # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+  "RUF",  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  "UP",  # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  "N",  # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+  "D4",  # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  "B",  # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  "FBT",  # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+  "C4",  # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  "EM",  # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
+  "ISC",  # https://docs.astral.sh/ruff/rules/multi-line-implicit-string-concatenation/
+  "PIE",  # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+  "RET",  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
+  "PL",  # https://docs.astral.sh/ruff/rules/#pylint-pl
+  "FURB",  # https://docs.astral.sh/ruff/rules/#refurb-furb
+  "TC",  # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
 ]
 fixable = ["ALL"]
-ignore= ["UP038"]
+ignore = ["UP038"]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["msgspec.Struct"]
@@ -88,30 +129,3 @@ runtime-evaluated-base-classes = ["msgspec.Struct"]
 
 [tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
-
-[tool.mypy]
-strict = true
-pretty = true
-files = ["src/**/*.py", "tests/**/*.py"]
-enable_error_code = ["ignore-without-code"]
-
-[tool.pytest.ini_options]
-addopts = [
-    "-ra",
-    "--showlocals",
-    "--strict-markers",
-    "--strict-config",
-    "--disable-socket",
-]
-filterwarnings = ["error"]
-log_cli_level = "INFO"
-testpaths = ["tests"]
-
-[tool.coverage.report]
-exclude_also = [
-    "if TYPE_CHECKING:", # Only used for type-hints
-]
-
-[build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]

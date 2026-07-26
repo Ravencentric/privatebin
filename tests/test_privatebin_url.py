@@ -62,4 +62,4 @@ def test_privatebin_url_error() -> None:
         PrivateBinUrl.parse("https://example.com")
 
     with pytest.raises(TypeError):
-        PrivateBinUrl.parse(None)  # type: ignore[arg-type]
+        PrivateBinUrl.parse(None)  # pyrefly: ignore[bad-argument-type]

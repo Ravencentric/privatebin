@@ -85,3 +85,4 @@ nav:
       - Models: api-reference/models.md
       - Enums: api-reference/enums.md
       - Exceptions: api-reference/exceptions.md
+      - Protocols: api-reference/protocols.md

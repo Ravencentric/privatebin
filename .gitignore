@@ -175,4 +175,3 @@ cython_debug/
 
 # Junk files
 test.py
-?.py

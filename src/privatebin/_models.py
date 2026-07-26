@@ -363,7 +363,9 @@ class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
             # The `MetaData` class needs 'meta' to be a dictionary with 'time_to_live'.
             # So we turn the API's empty list into {'time_to_live': None}
             # so `MetaData` can correctly parse it.
-            response["meta"] = {"time_to_live": None}
+            response["meta"] = {
+                "time_to_live": None  # pyrefly: ignore[implicit-any-empty-container]
+            }
 
         # PrivateBin API declares `open_discussion` and `burn_after_reading` (in `AuthenticatedData.cipher_parameters`)
         # as booleans, but its response contains them as integers (0 or 1).
