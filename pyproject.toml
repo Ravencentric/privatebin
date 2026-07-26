@@ -57,7 +57,7 @@ lint = [
 ]
 test = [
   "coverage[toml]>=7.6.12",
-  "pytest>=8.3.5",
+  "pytest>=9",
   "pytest-httpx>=0.35.0",
   "pytest-socket>=0.7.0",
   "tomli>=2.2.1",
@@ -83,17 +83,11 @@ missing-override-decorator = false
 not-required-key-access = false
 explicit-any = false
 
-
-[tool.pytest.ini_options]
-addopts = [
-  "-ra",
-  "--showlocals",
-  "--strict-markers",
-  "--strict-config",
-  "--disable-socket",
-]
+[tool.pytest]
+addopts = ["--disable-socket", "--showlocals", "-ra"]
 filterwarnings = ["error"]
 log_cli_level = "INFO"
+strict = true
 testpaths = ["tests"]
 
 [tool.ruff]
