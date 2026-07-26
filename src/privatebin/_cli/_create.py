@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 
 import rich
 from cyclopts import App, Parameter
-from cyclopts.types import ResolvedExistingFile  # noqa: TC002
+from cyclopts.types import ResolvedExistingFile
 
 import privatebin
 from privatebin import Attachment, Expiration, Formatter
@@ -17,7 +17,7 @@ create_app = App(
 
 
 @create_app.default
-def create(  # noqa: PLR0913
+def create(
     text: str | None = None,
     /,
     *,

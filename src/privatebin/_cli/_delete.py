@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import rich
 from cyclopts import App
-from cyclopts.types import URL  # noqa: TC002
+from cyclopts.types import URL
 
 import privatebin
 

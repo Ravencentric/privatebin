@@ -180,7 +180,7 @@ class PrivateBin:
             time_to_live=paste.meta.time_to_live,
         )
 
-    def create(  # noqa: PLR0913
+    def create(
         self,
         text: str,
         *,

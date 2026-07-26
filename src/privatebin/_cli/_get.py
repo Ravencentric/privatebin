@@ -4,7 +4,7 @@ from typing import Annotated
 
 import rich
 from cyclopts import App, Parameter
-from cyclopts.types import URL  # noqa: TC002
+from cyclopts.types import URL
 
 import privatebin
 

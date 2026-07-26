@@ -56,7 +56,7 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
         return client.get(id=url.id, passphrase=url.passphrase, password=password)
 
 
-def create(  # noqa: PLR0913
+def create(
     text: str,
     *,
     server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",

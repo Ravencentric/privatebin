@@ -159,7 +159,7 @@ class AuthenticatedData(NamedTuple):
     """Flag indicating if the paste should be burned after the first read."""
 
     @classmethod
-    def new(  # noqa: PLR0913
+    def new(
         cls,
         *,
         initialization_vector: bytes,
@@ -351,7 +351,7 @@ class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
             msg = response.get("message", "Failed to retrieve paste.")
             raise PrivateBinError(msg)
 
-        if response.get("v") != 2:  # noqa: PLR2004
+        if response.get("v") != 2:
             msg = f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {response.get('v', 'UNKNOWN')}"
             raise PrivateBinError(msg)
 
@@ -483,7 +483,7 @@ class Attachment(JsonStruct, frozen=True, kw_only=True):
         match = re.fullmatch(pattern, url)
 
         if match is None:
-            truncated = url[:50] + "... (TRUNCATED)" if len(url) > 50 else url  # noqa: PLR2004
+            truncated = url[:50] + "... (TRUNCATED)" if len(url) > 50 else url
             msg = (
                 "Paste has an invalid or unsupported attachment. "
                 f"Expected a data URL: 'data:<mimetype>;base64,<data>', got: {truncated!r}"

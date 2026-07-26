@@ -5,7 +5,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
-def decrypt(  # noqa: PLR0913
+def decrypt(
     data: bytes,
     length: int,
     salt: bytes,
@@ -63,7 +63,7 @@ def decrypt(  # noqa: PLR0913
     )
 
 
-def encrypt(  # noqa: PLR0913
+def encrypt(
     data: bytes,
     length: int,
     salt: bytes,
