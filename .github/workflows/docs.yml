@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'docs/**'
-      - '.github/workflows/docs.yml'
-      - 'mkdocs.yml'
+      - "src/**"
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "mkdocs.yml"
   workflow_dispatch:
 
 env:
@@ -17,13 +17,16 @@ env:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   docs:
+    name: Docs
     permissions:
-      pages: write
-      id-token: write
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -31,6 +34,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       - run: uv run mkdocs build --strict
@@ -38,7 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: './site'
+          path: "./site"
 
       - name: Deploy to GitHub Pages
         id: deployment

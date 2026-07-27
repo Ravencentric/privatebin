@@ -5,18 +5,18 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/tests.yml'
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/tests.yml"
     tags-ignore:
-      - 'v*.*.*'
+      - "v*.*.*"
   pull_request:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/tests.yml'
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/tests.yml"
   workflow_dispatch:
   workflow_call:
 
@@ -28,8 +28,10 @@ defaults:
   run:
     shell: bash
 
+permissions: {}
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -41,18 +43,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: false
 
       - name: Install the project
         run: uv sync
@@ -63,7 +68,7 @@ jobs:
           uv run coverage xml
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-${{ matrix.python-version }}
           path: coverage.xml
@@ -75,20 +80,21 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write
+      id-token: write # to upload coverage to codecov
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
-          merge-multiple: false
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0

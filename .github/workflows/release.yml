@@ -3,11 +3,17 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 env:
   FORCE_COLOR: 1
   UV_LOCKED: 1
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:
@@ -23,19 +29,21 @@ jobs:
       name: pypi
       url: https://pypi.org/project/privatebin/
     permissions:
-      id-token: write
-      contents: write
+      id-token: write # to publish to PyPI
+      contents: write # to publish to GitHub
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # Important for changelog
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: "3.13"
+          enable-cache: false
 
       - name: Build
         run: uv build
@@ -46,11 +54,13 @@ jobs:
       - name: Generate a changelog
         run: >-
           uvx git-cliff --config github 
-          --github-repo ${{ github.repository }}
-          --github-token ${{ github.token }}
+          --github-repo ${GITHUB_REPOSITORY}
+          --github-token ${GH_TOKEN}
           --latest --strip all --output "CHANGELOG.md"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Create Release
-        run: gh release create ${{ github.ref_name }} -F "CHANGELOG.md" --fail-on-no-commits
+        run: gh release create ${GITHUB_REF_NAME} -F "CHANGELOG.md" --fail-on-no-commits
         env:
           GH_TOKEN: ${{ github.token }}
