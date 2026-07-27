@@ -44,7 +44,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run mypy
-        run: uv run mypy .
+        run: uv run pyrefly
 
       - name: Run ruff lint
         run: uv run ruff check .
