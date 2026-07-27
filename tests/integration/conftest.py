@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import httpx
 import pytest
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-def get_container_runtime() -> str:
+def get_container_runtime() -> Literal["docker", "podman"]:
     if shutil.which("docker") is not None:
         return "docker"
     if shutil.which("podman") is not None:
