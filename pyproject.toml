@@ -88,7 +88,7 @@ filterwarnings = ["error"]
 log_cli_level = "INFO"
 strict = true
 testpaths = ["tests"]
-markers = ["integration: requires a PrivateBin test instance running on localhost"]
+markers = ["integration: Requires a PrivateBin test instance running on localhost"]
 
 [tool.ruff]
 line-length = 99
