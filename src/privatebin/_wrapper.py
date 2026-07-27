@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from urllib.parse import urlparse
 
 from privatebin._core import PrivateBin
@@ -60,7 +61,7 @@ def create(
     text: str,
     *,
     server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",
-    attachment: Attachment | None = None,
+    attachment: Attachment | Iterable[Attachment] | None = None,
     password: str | None = None,
     burn_after_reading: bool = False,
     open_discussion: bool = False,
@@ -77,8 +78,8 @@ def create(
         The text content of the paste.
     server : str | PrivateBinUrl | PasteReceipt, optional
         The base URL of the PrivateBin instance to use.
-    attachment : Attachment, optional
-        An attachment to include with the paste.
+    attachment : Attachment | Iterable[Attachment], optional
+        An attachment or iterable of attachments to include with the paste.
     password : str, optional
         A password to encrypt the paste with an additional layer of security.
         If provided, users will need this password in addition to the passphrase to decrypt the paste.

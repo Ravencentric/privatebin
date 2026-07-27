@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+from collections.abc import Iterable
 from types import NoneType
 from typing import TYPE_CHECKING, Any
 
@@ -124,8 +125,8 @@ class PrivateBin:
         with PrivateBin() as pb:
             paste = pb.get(id="pasteid", passphrase="secret")
             print(paste.text)
-            if paste.attachment:
-                print(f"Attachment name: {paste.attachment.name}")
+            for attachment in paste.attachments:
+                print(f"Attachment name: {attachment.name}")
         ```
 
         """
@@ -166,19 +167,33 @@ class PrivateBin:
         decompressed = Compressor(mode=cipher_parameters.compression).decompress(decrypted)
         finalized: RawPasteContent = json.loads(decompressed)
 
-        try:
-            text = finalized["paste"]
-            data_url = finalized["attachment"]
-            name = finalized["attachment_name"]
-            attachment = Attachment.from_data_url(url=data_url, name=name)
-        except KeyError:
-            text = finalized["paste"]
-            attachment = None
+        match finalized:
+            case {
+                "paste": str(text),
+                "attachment": str(url),
+                "attachment_name": str(name),
+            }:
+                attachments = (Attachment.from_data_url(url=url, name=name),)
+
+            case {
+                "paste": str(text),
+                "attachment": list(urls),
+                "attachment_name": list(names),
+            }:
+                attachments = tuple(
+                    Attachment.from_data_url(url=url, name=name) for url, name in zip(urls, names)
+                )
+
+            case {"paste": str(text)}:
+                attachments = ()
+
+            case _ as unreachable:
+                assert False, f"'paste' key can never be missing in {unreachable}"
 
         return Paste(
             id=paste.id,
             text=text,
-            attachment=attachment,
+            attachments=attachments,
             formatter=paste.adata.formatter,
             open_discussion=paste.adata.open_discussion,
             burn_after_reading=paste.adata.burn_after_reading,
@@ -189,7 +204,7 @@ class PrivateBin:
         self,
         text: str,
         *,
-        attachment: Attachment | None = None,
+        attachment: Attachment | Iterable[Attachment] | None = None,
         password: str | None = None,
         burn_after_reading: bool = False,
         open_discussion: bool = False,
@@ -204,8 +219,8 @@ class PrivateBin:
         ----------
         text : str
             The text content of the paste.
-        attachment : Attachment, optional
-            An attachment to include with the paste.
+        attachment : Attachment | Iterable[Attachment], optional
+            An attachment or iterable of attachments to include with the paste.
         password : str, optional
             A password to encrypt the paste with an additional layer of security.
             If provided, users will need this password in addition to the passphrase to decrypt the paste.
@@ -277,11 +292,33 @@ class PrivateBin:
 
         """
         assert_type(text, str, param="text")
-        assert_type(attachment, (Attachment, NoneType), param="attachment")
         assert_type(password, (str, NoneType), param="password")
         assert_type(expiration, Expiration, param="expiration")
         assert_type(formatter, Formatter, param="formatter")
         assert_type(compression, Compression, param="compression")
+
+        match attachment:
+            case None:
+                attachments: tuple[Attachment, ...] = ()
+
+            case Attachment():
+                attachments = (attachment,)
+
+            case Iterable():
+                items = []
+                for item in attachment:
+                    if not isinstance(item, Attachment):
+                        raise TypeError(
+                            "Parameter 'attachment' expected an iterable of 'Attachment' objects."
+                        )
+                    items.append(item)
+                attachments = tuple(items)
+
+            case _:
+                raise TypeError(
+                    "Parameter 'attachment' expected 'Attachment', "
+                    "'Iterable[Attachment]', or 'NoneType'."
+                )
 
         # Early error if both burn_after_reading and open_discussion are True
         if burn_after_reading and open_discussion:
@@ -298,9 +335,14 @@ class PrivateBin:
         passphrase = os.urandom(PrivateBinEncryptionSetting.KEY_SIZE // 8)
 
         data = RawPasteContent(paste=text)
-        if attachment:
-            data["attachment"] = attachment.to_data_url()
-            data["attachment_name"] = attachment.name
+        match attachments:
+            case (attachment,):
+                data["attachment"] = attachment.to_data_url()
+                data["attachment_name"] = attachment.name
+
+            case (_, *_):
+                data["attachment"] = [attachment.to_data_url() for attachment in attachments]
+                data["attachment_name"] = [attachment.name for attachment in attachments]
 
         encoded_data = to_compact_jsonb(data)
         compressed_data = Compressor(mode=compression).compress(encoded_data)

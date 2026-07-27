@@ -33,11 +33,13 @@ class RawPasteContent(TypedDict):
         "attachment_name": "hello.txt"
     }
     ```
+
+    For multiple attachments, `attachment` and `attachment_name` are lists.
     """
 
     paste: str
-    attachment: NotRequired[str]
-    attachment_name: NotRequired[str]
+    attachment: NotRequired[str | list[str]]
+    attachment_name: NotRequired[str | list[str]]
 
 
 class CipherParameters(NamedTuple):
@@ -519,8 +521,8 @@ class Paste(JsonStruct, frozen=True, kw_only=True):
     """Unique identifier for the paste."""
     text: str
     """The decrypted text content of the paste."""
-    attachment: Attachment | None
-    """Attachment associated with the paste, if any."""
+    attachments: tuple[Attachment, ...]
+    """Attachments associated with the paste."""
     formatter: Formatter
     """Formatting option applied to the paste content."""
     open_discussion: bool

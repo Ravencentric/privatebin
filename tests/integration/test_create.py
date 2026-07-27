@@ -21,9 +21,9 @@ def test_create_with_attachment(pbin_client: PrivateBin) -> None:
     receipt = pbin_client.create("Hello World!", attachment=attachment)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "Hello World!"
-    assert paste.attachment is not None
-    assert paste.attachment.name == "bar.txt"
-    assert paste.attachment.content == b"foo"
+    assert len(paste.attachments) == 1
+    assert paste.attachments[0].name == "bar.txt"
+    assert paste.attachments[0].content == b"foo"
 
 
 def test_create_with_password(pbin_client: PrivateBin) -> None:
@@ -99,8 +99,8 @@ def test_create_burn_after_reading_with_attachment(pbin_client: PrivateBin) -> N
     receipt = pbin_client.create("burn text", burn_after_reading=True, attachment=attachment)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "burn text"
-    assert paste.attachment is not None
-    assert paste.attachment.content == b"burn"
+    assert len(paste.attachments) == 1
+    assert paste.attachments[0].content == b"burn"
     assert paste.burn_after_reading is True
 
 
@@ -110,3 +110,18 @@ def test_create_burn_after_reading_with_markdown(pbin_client: PrivateBin) -> Non
     assert paste.text == "# burn"
     assert paste.formatter is Formatter.MARKDOWN
     assert paste.burn_after_reading is True
+
+
+def test_create_with_multiple_attachments(pbin_client: PrivateBin) -> None:
+    attachments = (
+        Attachment(content=b"foo", name="foo.txt"),
+        Attachment(content=b"bar", name="bar.txt"),
+    )
+    receipt = pbin_client.create("multiple attachments", attachment=attachments)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "multiple attachments"
+    assert len(paste.attachments) == 2
+    assert paste.attachments[0].name == "foo.txt"
+    assert paste.attachments[0].content == b"foo"
+    assert paste.attachments[1].name == "bar.txt"
+    assert paste.attachments[1].content == b"bar"

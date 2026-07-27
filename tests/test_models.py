@@ -78,7 +78,23 @@ def test_paste_json_roundtrip() -> None:
     paste = Paste(
         id="abcdef",
         text="hello world",
-        attachment=Attachment(name="baz.txt", content=b"Foo and bar"),
+        attachments=(Attachment(name="baz.txt", content=b"Foo and bar"),),
+        formatter=Formatter.MARKDOWN,
+        open_discussion=False,
+        burn_after_reading=False,
+        time_to_live=timedelta(days=1),
+    )
+    assert Paste.from_json(paste.to_json()) == paste
+
+
+def test_paste_json_roundtrip_multiple_attachments() -> None:
+    paste = Paste(
+        id="abcdef",
+        text="hello world",
+        attachments=(
+            Attachment(name="baz.txt", content=b"Foo and bar"),
+            Attachment(name="qux.txt", content=b"Qux"),
+        ),
         formatter=Formatter.MARKDOWN,
         open_discussion=False,
         burn_after_reading=False,
