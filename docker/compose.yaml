@@ -1,0 +1,15 @@
+name: "PrivateBin"
+
+services:
+  privatebin:
+    image: "privatebin/unit-fs:stable@sha256:796e95792367ca493788f13c09bad1c54a105a921c19b9eb50fa24fac24c75d5" # v2.0.5
+    restart: "always"
+    read_only: true
+    volumes:
+      - "./conf.php:/srv/cfg/conf.php:ro"
+    tmpfs:
+      - "/tmp:nodev,noexec,mode=1777"
+      - "/run:nodev,exec,mode=1777"
+      - "/srv/data:nodev,noexec,mode=1777"
+    ports:
+      - "127.0.0.1:57391:8080"

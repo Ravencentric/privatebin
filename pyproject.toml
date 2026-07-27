@@ -58,7 +58,6 @@ lint = [
 test = [
   "coverage[toml]>=7.6.12",
   "pytest>=9",
-  "pytest-httpx>=0.35.0",
   "pytest-socket>=0.7.0",
   "tomli>=2.2.1",
 ]
@@ -84,11 +83,12 @@ not-required-key-access = false
 explicit-any = false
 
 [tool.pytest]
-addopts = ["--disable-socket", "--showlocals", "-ra"]
+addopts = ["--disable-socket", "--allow-hosts=127.0.0.1", "--showlocals", "-ra"]
 filterwarnings = ["error"]
 log_cli_level = "INFO"
 strict = true
 testpaths = ["tests"]
+markers = ["integration: requires a PrivateBin test instance running on localhost"]
 
 [tool.ruff]
 line-length = 99
