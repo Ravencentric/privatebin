@@ -34,12 +34,17 @@ concurrency:
 
 jobs:
   test:
-    name: Tests
+    name: Tests / Python ${{ matrix.python-version }}
+    permissions:
+      contents: read
+
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -57,9 +62,38 @@ jobs:
           uv run coverage run -m pytest --run-integration -vv
           uv run coverage xml
 
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: error
+
+  codecov:
+    name: Codecov
+    needs: test
+
+    permissions:
+      contents: read
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: false
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           env_vars: OS,PYTHON
-          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: coverage
+          use_oidc: true
           verbose: true
