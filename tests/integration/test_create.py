@@ -11,7 +11,9 @@ def test_create(pbin_client: PrivateBin) -> None:
     assert receipt.url.id
     assert receipt.delete_token
     assert str(receipt.url) == f"{pbin_client.server}?{receipt.url.id}#********"
-    assert receipt.url.unmask() == f"{pbin_client.server}?{receipt.url.id}#{receipt.url.passphrase}"
+    assert (
+        receipt.url.unmask() == f"{pbin_client.server}?{receipt.url.id}#{receipt.url.passphrase}"
+    )
 
 
 def test_create_with_attachment(pbin_client: PrivateBin) -> None:
