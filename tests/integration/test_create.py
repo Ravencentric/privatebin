@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import httpx
 import pytest
 
 from privatebin import Attachment, Compression, Expiration, Formatter, PrivateBin, PrivateBinError
