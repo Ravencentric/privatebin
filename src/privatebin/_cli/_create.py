@@ -24,7 +24,7 @@ def create(
     server: Annotated[
         str, Parameter(name=["--server", "-s"], env_var="PRIVATEBIN_SERVER")
     ] = "https://privatebin.net/",
-    attachment: Annotated[
+    attachments: Annotated[
         list[ResolvedExistingFile] | None, Parameter(name=["--attachment", "-a"])
     ] = None,
     password: Annotated[str | None, Parameter(name=["--password", "-p"])] = None,
@@ -48,7 +48,7 @@ def create(
         The text content of the paste.
     server : str, optional
         The base URL of the PrivateBin instance to use.
-    attachment : list[ResolvedExistingFile], optional
+    attachments : list[ResolvedExistingFile], optional
         Attachments to include with the paste.
     password : str, optional
         A password to encrypt the paste with an additional layer of security.
@@ -66,7 +66,7 @@ def create(
     """
     try:
         _attachments = (
-            tuple(Attachment.from_file(file) for file in attachment) if attachment else None
+            tuple(Attachment.from_file(file) for file in attachments) if attachments else None
         )
 
         if text is None:
@@ -81,7 +81,7 @@ def create(
         paste = privatebin.create(
             text=text.strip(),
             server=server,
-            attachment=_attachments,
+            attachments=_attachments,
             password=password,
             burn_after_reading=burn,
             expiration=Expiration(expiration),

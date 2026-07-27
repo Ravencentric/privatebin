@@ -61,7 +61,7 @@ def create(
     text: str,
     *,
     server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",
-    attachment: Attachment | Iterable[Attachment] | None = None,
+    attachments: Attachment | Iterable[Attachment] | None = None,
     password: str | None = None,
     burn_after_reading: bool = False,
     open_discussion: bool = False,
@@ -78,7 +78,7 @@ def create(
         The text content of the paste.
     server : str | PrivateBinUrl | PasteReceipt, optional
         The base URL of the PrivateBin instance to use.
-    attachment : Attachment | Iterable[Attachment], optional
+    attachments : Attachment | Iterable[Attachment], optional
         An attachment or iterable of attachments to include with the paste.
     password : str, optional
         A password to encrypt the paste with an additional layer of security.
@@ -143,7 +143,7 @@ def create(
     paste = privatebin.create(
         text="This paste has a password and an attachment.",
         password="supersecret",
-        attachment=attachment
+        attachments=attachment
     )
 
     print(f"Password-protected paste URL: {paste.url}")
@@ -164,7 +164,7 @@ def create(
     with PrivateBin(_server) as client:
         return client.create(
             text=text,
-            attachment=attachment,
+            attachments=attachments,
             password=password,
             burn_after_reading=burn_after_reading,
             open_discussion=open_discussion,

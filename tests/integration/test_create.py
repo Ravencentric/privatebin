@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 import pytest
 
 from privatebin import Attachment, Compression, Expiration, Formatter, PrivateBin, PrivateBinError
@@ -18,7 +19,7 @@ def test_create(pbin_client: PrivateBin) -> None:
 
 def test_create_with_attachment(pbin_client: PrivateBin) -> None:
     attachment = Attachment(content=b"foo", name="bar.txt")
-    receipt = pbin_client.create("Hello World!", attachment=attachment)
+    receipt = pbin_client.create("Hello World!", attachments=attachment)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "Hello World!"
     assert len(paste.attachments) == 1
@@ -96,7 +97,7 @@ def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> Non
 
 def test_create_burn_after_reading_with_attachment(pbin_client: PrivateBin) -> None:
     attachment = Attachment(content=b"burn", name="burn.txt")
-    receipt = pbin_client.create("burn text", burn_after_reading=True, attachment=attachment)
+    receipt = pbin_client.create("burn text", burn_after_reading=True, attachments=attachment)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "burn text"
     assert len(paste.attachments) == 1
@@ -117,7 +118,7 @@ def test_create_with_multiple_attachments(pbin_client: PrivateBin) -> None:
         Attachment(content=b"foo", name="foo.txt"),
         Attachment(content=b"bar", name="bar.txt"),
     )
-    receipt = pbin_client.create("multiple attachments", attachment=attachments)
+    receipt = pbin_client.create("multiple attachments", attachments=attachments)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "multiple attachments"
     assert len(paste.attachments) == 2

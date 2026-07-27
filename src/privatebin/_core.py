@@ -204,7 +204,7 @@ class PrivateBin:
         self,
         text: str,
         *,
-        attachment: Attachment | Iterable[Attachment] | None = None,
+        attachments: Attachment | Iterable[Attachment] | None = None,
         password: str | None = None,
         burn_after_reading: bool = False,
         open_discussion: bool = False,
@@ -219,7 +219,7 @@ class PrivateBin:
         ----------
         text : str
             The text content of the paste.
-        attachment : Attachment | Iterable[Attachment], optional
+        attachments : Attachment | Iterable[Attachment], optional
             An attachment or iterable of attachments to include with the paste.
         password : str, optional
             A password to encrypt the paste with an additional layer of security.
@@ -285,7 +285,7 @@ class PrivateBin:
             paste = pb.create(
                 text="This paste has a password and an attachment.",
                 password="supersecret",
-                attachment=attachment
+                attachments=attachment
             )
             print(f"Password-protected paste URL: {paste.url}")
         ```
@@ -297,52 +297,48 @@ class PrivateBin:
         assert_type(formatter, Formatter, param="formatter")
         assert_type(compression, Compression, param="compression")
 
-        match attachment:
+        if burn_after_reading and open_discussion:
+            raise PrivateBinError(
+                "Cannot create a paste with both 'burn_after_reading' and "
+                "'open_discussion' enabled. A paste that burns after reading "
+                "cannot have open discussions."
+            )
+
+        data = RawPasteContent(paste=text)
+
+        match attachments:
             case None:
-                attachments: tuple[Attachment, ...] = ()
+                pass
 
             case Attachment():
-                attachments = (attachment,)
+                data["attachment"] = attachments.to_data_url()
+                data["attachment_name"] = attachments.name
 
             case Iterable():
-                items = []
-                for item in attachment:
-                    if not isinstance(item, Attachment):
-                        raise TypeError(
-                            "Parameter 'attachment' expected an iterable of 'Attachment' objects."
+                data["attachment"] = []
+                data["attachment_name"] = []
+
+                for attachment in attachments:
+                    if not isinstance(attachment, Attachment):
+                        msg = (
+                            "Parameter 'attachments' expected an iterable of 'Attachment' objects."
                         )
-                    items.append(item)
-                attachments = tuple(items)
+                        raise TypeError(msg)
+
+                    data["attachment"].append(attachment.to_data_url())
+                    data["attachment_name"].append(attachment.name)
 
             case _:
                 raise TypeError(
-                    "Parameter 'attachment' expected 'Attachment', "
+                    "Parameter 'attachments' expected 'Attachment', "
                     "'Iterable[Attachment]', or 'NoneType'."
                 )
-
-        # Early error if both burn_after_reading and open_discussion are True
-        if burn_after_reading and open_discussion:
-            msg = (
-                "Cannot create a paste with both 'burn_after_reading' and 'open_discussion' enabled. "
-                "A paste that burns after reading cannot have open discussions."
-            )
-            raise PrivateBinError(msg)
 
         initialization_vector = os.urandom(PrivateBinEncryptionSetting.TAG_SIZE // 8)
         salt = os.urandom(PrivateBinEncryptionSetting.SALT_SIZE)
 
         encoded_password = password.encode() if password else b""
         passphrase = os.urandom(PrivateBinEncryptionSetting.KEY_SIZE // 8)
-
-        data = RawPasteContent(paste=text)
-        match attachments:
-            case (attachment,):
-                data["attachment"] = attachment.to_data_url()
-                data["attachment_name"] = attachment.name
-
-            case (_, *_):
-                data["attachment"] = [attachment.to_data_url() for attachment in attachments]
-                data["attachment_name"] = [attachment.name for attachment in attachments]
 
         encoded_data = to_compact_jsonb(data)
         compressed_data = Compressor(mode=compression).compress(encoded_data)
