@@ -5,18 +5,18 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/lint-and-type-check.yml'
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/lint-and-type-check.yml"
     tags-ignore:
-      - 'v*.*.*'
+      - "v*.*.*"
   pull_request:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/lint-and-type-check.yml'
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/lint-and-type-check.yml"
   workflow_dispatch:
   workflow_call:
 
@@ -28,17 +28,29 @@ defaults:
   run:
     shell: bash
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
+    name: Check
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: "3.14"
+          enable-cache: false
 
       - name: Install the project
         run: uv sync --all-extras
