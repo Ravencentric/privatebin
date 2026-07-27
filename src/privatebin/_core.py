@@ -7,6 +7,7 @@ from types import NoneType
 from typing import TYPE_CHECKING, Any
 
 import base58
+import cryptography.exceptions
 import httpx
 
 from privatebin._crypto import decrypt, encrypt
@@ -148,15 +149,19 @@ class PrivateBin:
         paste = PasteJsonLD.from_response(response.json())
         cipher_parameters = paste.adata.cipher_parameters
 
-        decrypted = decrypt(
-            data=paste.ct,
-            length=cipher_parameters.key_size // 8,
-            salt=cipher_parameters.salt,
-            iterations=cipher_parameters.iterations,
-            key_material=decoded_passphrase + encoded_password,
-            initialization_vector=cipher_parameters.initialization_vector,
-            associated_data=paste.adata.to_bytes(),
-        )
+        try:
+            decrypted = decrypt(
+                data=paste.ct,
+                length=cipher_parameters.key_size // 8,
+                salt=cipher_parameters.salt,
+                iterations=cipher_parameters.iterations,
+                key_material=decoded_passphrase + encoded_password,
+                initialization_vector=cipher_parameters.initialization_vector,
+                associated_data=paste.adata.to_bytes(),
+            )
+        except cryptography.exceptions.InvalidTag as exc:
+            msg = "Failed to decrypt paste. Check the passphrase and password."
+            raise PrivateBinError(msg) from exc
 
         decompressed = Compressor(mode=cipher_parameters.compression).decompress(decrypted)
         finalized: RawPasteContent = json.loads(decompressed)

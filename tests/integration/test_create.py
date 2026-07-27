@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from privatebin import Attachment, Formatter, PrivateBin, PrivateBinError
+from privatebin import Attachment, Compression, Expiration, Formatter, PrivateBin, PrivateBinError
 
 
 def test_create(pbin_client: PrivateBin) -> None:
@@ -41,6 +41,33 @@ def test_create_with_markdown(pbin_client: PrivateBin) -> None:
     assert paste.formatter is Formatter.MARKDOWN
 
 
+def test_create_with_source_code(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("print('hello')", formatter=Formatter.SOURCE_CODE)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "print('hello')"
+    assert paste.formatter is Formatter.SOURCE_CODE
+
+
+def test_create_with_no_compression(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("hello", compression=Compression.NONE)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "hello"
+
+
+def test_create_with_open_discussion(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("discuss", open_discussion=True)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "discuss"
+    assert paste.open_discussion is True
+
+
+def test_create_never_expires(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("forever", expiration=Expiration.NEVER)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "forever"
+    assert paste.time_to_live is None
+
+
 def test_create_burn_after_reading(pbin_client: PrivateBin) -> None:
     receipt = pbin_client.create("burn", burn_after_reading=True)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
@@ -48,3 +75,38 @@ def test_create_burn_after_reading(pbin_client: PrivateBin) -> None:
     assert paste.burn_after_reading is True
     with pytest.raises(PrivateBinError):
         pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+
+
+def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("burn secret", burn_after_reading=True, password="hunter2")
+    paste = pbin_client.get(
+        id=receipt.url.id,
+        passphrase=receipt.url.passphrase,
+        password="hunter2",
+    )
+    assert paste.text == "burn secret"
+    assert paste.burn_after_reading is True
+    with pytest.raises(PrivateBinError):
+        pbin_client.get(
+            id=receipt.url.id,
+            passphrase=receipt.url.passphrase,
+            password="hunter2",
+        )
+
+
+def test_create_burn_after_reading_with_attachment(pbin_client: PrivateBin) -> None:
+    attachment = Attachment(content=b"burn", name="burn.txt")
+    receipt = pbin_client.create("burn text", burn_after_reading=True, attachment=attachment)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "burn text"
+    assert paste.attachment is not None
+    assert paste.attachment.content == b"burn"
+    assert paste.burn_after_reading is True
+
+
+def test_create_burn_after_reading_with_markdown(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("# burn", burn_after_reading=True, formatter=Formatter.MARKDOWN)
+    paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+    assert paste.text == "# burn"
+    assert paste.formatter is Formatter.MARKDOWN
+    assert paste.burn_after_reading is True

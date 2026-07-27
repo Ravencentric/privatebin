@@ -13,6 +13,25 @@ def test_get(pbin_client: PrivateBin) -> None:
     assert paste.time_to_live is not None
 
 
+def test_get_with_wrong_password(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("secret", password="correct")
+    with pytest.raises(PrivateBinError):
+        pbin_client.get(
+            id=receipt.url.id,
+            passphrase=receipt.url.passphrase,
+            password="wrong",
+        )
+
+
+def test_get_with_wrong_passphrase(pbin_client: PrivateBin) -> None:
+    receipt = pbin_client.create("hello")
+    with pytest.raises(PrivateBinError):
+        pbin_client.get(
+            id=receipt.url.id,
+            passphrase="5qLFA8Vueqg5g7dAXZ3FLZBL6JQpzSwXzjwJahVsUFbH",
+        )
+
+
 def test_get_nonexistent(pbin_client: PrivateBin) -> None:
     with pytest.raises(PrivateBinError):
         pbin_client.get(

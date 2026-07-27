@@ -20,33 +20,7 @@ def test_create_burn_after_reading_and_open_discussion() -> None:
 
 @pytest.mark.parametrize("version", [1, 3])
 def test_unsupported_api_version(version: int) -> None:
-    response: dict[str, object] = {
-        "status": 0,
-        "id": "abc123",
-        "url": "/?abc123",
-        "adata": [
-            [
-                "EhGlr6MDIrNHFyhdMAE6gA==",
-                "wATfGNcSqjM=",
-                100000,
-                256,
-                128,
-                "aes",
-                "gcm",
-                "zlib",
-            ],
-            "plaintext",
-            0,
-            0,
-        ],
-        "meta": {"time_to_live": 12345},
-        "v": version,
-        "ct": "NnMN8PGFNUzKNnXXz9DLhX/c5Ukb0rn61BDqZYVttkEqrUJDIm9r20bH",
-        "comments": [],
-        "comment_count": 0,
-        "comment_offset": 0,
-        "@context": "?jsonld=paste",
-    }
+    response: dict[str, object] = {"status": 0, "v": version}
     with pytest.raises(
         PrivateBinError,
         match=re.escape(
@@ -59,3 +33,13 @@ def test_unsupported_api_version(version: int) -> None:
 def test_get_error_response() -> None:
     with pytest.raises(PrivateBinError, match="Something went terribly wrong!"):
         PasteJsonLD.from_response({"status": 1, "message": "Something went terribly wrong!"})
+
+
+def test_server_property() -> None:
+    client = PrivateBin("https://example.com/")
+    assert client.server == "https://example.com/"
+
+
+def test_context_manager() -> None:
+    with PrivateBin("https://example.com/") as client:
+        assert client.server == "https://example.com/"
