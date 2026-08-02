@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from enum import IntEnum
 
@@ -78,3 +79,18 @@ class EncryptionSpec(IntEnum):
     SALT_SIZE = 8  # Allowed: 8 (According to my own tests.)
     KEY_SIZE = 256  # Allowed: [128, 196, 256] (as per PrivateBin)
     TAG_SIZE = 128  # Allowed: [64, 96, 104, 112, 120, 128] (as per PrivateBin)
+
+    @staticmethod
+    def initialization_vector() -> bytes:
+        """Generate a random initialization vector."""
+        return os.urandom(EncryptionSpec.TAG_SIZE // 8)
+
+    @staticmethod
+    def passphrase() -> bytes:
+        """Generate a random passphrase."""
+        return os.urandom(EncryptionSpec.KEY_SIZE // 8)
+
+    @staticmethod
+    def salt() -> bytes:
+        """Generate a random salt."""
+        return os.urandom(EncryptionSpec.SALT_SIZE)

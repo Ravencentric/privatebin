@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import base64
 import json
-import os
 from collections.abc import Iterable
 from types import NoneType
 from typing import TYPE_CHECKING, Any
@@ -329,11 +328,11 @@ class PrivateBin:
                     "'Iterable[Attachment]', or 'NoneType'."
                 )
 
-        initialization_vector = os.urandom(EncryptionSpec.TAG_SIZE // 8)
-        salt = os.urandom(EncryptionSpec.SALT_SIZE)
+        initialization_vector = EncryptionSpec.initialization_vector()
+        salt = EncryptionSpec.salt()
+        passphrase = EncryptionSpec.passphrase()
 
         encoded_password = password.encode() if password else b""
-        passphrase = os.urandom(EncryptionSpec.KEY_SIZE // 8)
 
         encoded_data = to_compact_jsonb(data)
         compressed_data = Compressor(mode=compression).compress(encoded_data)
