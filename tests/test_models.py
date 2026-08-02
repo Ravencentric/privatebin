@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import base64
+import os
 import re
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
 import pytest
 
-from privatebin import Attachment, Formatter, Paste, PrivateBinUrl
+from privatebin import Attachment, Formatter, Mode, Paste, PrivateBinUrl
+from privatebin._models import AuthenticatedData
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -80,8 +82,7 @@ def test_paste_json_roundtrip() -> None:
         text="hello world",
         attachments=(Attachment(name="baz.txt", content=b"Foo and bar"),),
         formatter=Formatter.MARKDOWN,
-        open_discussion=False,
-        burn_after_reading=False,
+        mode=Mode.OPEN_DISCUSSION,
         time_to_live=timedelta(days=1),
     )
     assert Paste.from_json(paste.to_json()) == paste
@@ -96,11 +97,30 @@ def test_paste_json_roundtrip_multiple_attachments() -> None:
             Attachment(name="qux.txt", content=b"Qux"),
         ),
         formatter=Formatter.MARKDOWN,
-        open_discussion=False,
-        burn_after_reading=False,
+        mode=Mode.BURN_AFTER_READING,
         time_to_live=timedelta(days=1),
     )
     assert Paste.from_json(paste.to_json()) == paste
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        pytest.param(None, id="default"),
+        pytest.param(Mode.OPEN_DISCUSSION, id="open-discussion"),
+        pytest.param(Mode.BURN_AFTER_READING, id="burn-after-reading"),
+    ],
+)
+def test_authenticated_data_mode_roundtrip(mode: Mode | None) -> None:
+    data = AuthenticatedData.new(
+        initialization_vector=os.urandom(16),
+        salt=os.urandom(8),
+        mode=mode,
+    )
+
+    assert data.mode is mode
+    assert data.open_discussion is (mode is Mode.OPEN_DISCUSSION)
+    assert data.burn_after_reading is (mode is Mode.BURN_AFTER_READING)
 
 
 def test_privatebin_url_json_roundtrip() -> None:

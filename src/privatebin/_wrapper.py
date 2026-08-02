@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from urllib.parse import urlparse
 
 from privatebin._core import PrivateBin
-from privatebin._enums import Compression, Expiration, Formatter
+from privatebin._enums import Compression, Expiration, Formatter, Mode
 from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
 
 
@@ -63,8 +63,7 @@ def create(
     server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",
     attachments: Attachment | Iterable[Attachment] | None = None,
     password: str | None = None,
-    burn_after_reading: bool = False,
-    open_discussion: bool = False,
+    mode: Mode | None = None,
     expiration: Expiration = Expiration.ONE_WEEK,
     formatter: Formatter = Formatter.PLAIN_TEXT,
     compression: Compression = Compression.ZLIB,
@@ -83,10 +82,9 @@ def create(
     password : str, optional
         A password to encrypt the paste with an additional layer of security.
         If provided, users will need this password in addition to the passphrase to decrypt the paste.
-    burn_after_reading : bool, optional
-        Set to `True` if the paste should be automatically deleted after the first view.
-    open_discussion : bool, optional
-        Set to `True` to enable open discussions/comments on the paste.
+    mode : Mode | None, optional
+        The paste mode. See the `Mode` enum for available variants.
+        Defaults to no mode.
     expiration : Expiration, optional
         The desired expiration time for the paste.
     formatter : Formatter, optional
@@ -103,8 +101,7 @@ def create(
     Raises
     ------
     PrivateBinError
-        - If `burn_after_reading` and `open_discussion` are both set to `True`.
-        - If there is an error during paste creation on PrivateBin.
+        If there is an error during paste creation on PrivateBin.
     TypeError
         If the provided 'url' is not in the expected type.
 
@@ -121,13 +118,13 @@ def create(
 
     ```python
     import privatebin
-    from privatebin import Formatter
+    from privatebin import Formatter, Mode
 
     paste = privatebin.create(
         text="This *is* **markdown** formatted text.",
         server="https://myprivatebin.example.org/",
         formatter=Formatter.MARKDOWN,
-        burn_after_reading=True
+        mode=Mode.BURN_AFTER_READING
     )
     print(f"Markdown paste URL: {paste.url}")
     ```
@@ -166,8 +163,7 @@ def create(
             text=text,
             attachments=attachments,
             password=password,
-            burn_after_reading=burn_after_reading,
-            open_discussion=open_discussion,
+            mode=mode,
             expiration=expiration,
             formatter=formatter,
             compression=compression,

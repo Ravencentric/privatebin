@@ -30,6 +30,15 @@ class Compression(StrEnum):
     NONE = "none"
 
 
+class Mode(StrEnum):
+    """Paste modes for PrivateBin."""
+
+    BURN_AFTER_READING = "burn_after_reading"
+    """Automatically delete the paste after the first view."""
+    OPEN_DISCUSSION = "open_discussion"
+    """Enable open discussions/comments on the paste."""
+
+
 class Expiration(StrEnum):
     """
     Paste expiration durations for PrivateBin.

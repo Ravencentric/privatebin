@@ -8,14 +8,13 @@ from privatebin import PrivateBin, PrivateBinError
 from privatebin._models import PasteJsonLD
 
 
-def test_create_burn_after_reading_and_open_discussion() -> None:
+def test_create_invalid_mode() -> None:
     client = PrivateBin("https://example.com/")
     errmsg = (
-        "Cannot create a paste with both 'burn_after_reading' and 'open_discussion' enabled. "
-        "A paste that burns after reading cannot have open discussions."
+        "Parameter 'mode' expected one of the following types: 'Mode', 'NoneType', but got 'str'."
     )
-    with pytest.raises(PrivateBinError, match=errmsg):
-        client.create(text="hello world", burn_after_reading=True, open_discussion=True)
+    with pytest.raises(TypeError, match=re.escape(errmsg)):
+        client.create(text="hello world", mode="invalid")  # pyrefly: ignore[bad-argument-type]
 
 
 @pytest.mark.parametrize("version", [1, 3])

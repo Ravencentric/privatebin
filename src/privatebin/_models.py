@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 
 import msgspec
 
-from privatebin._enums import Compression, Formatter, PrivateBinEncryptionSetting
+from privatebin._enums import Compression, Formatter, Mode, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_jsonb
 
@@ -167,8 +167,7 @@ class AuthenticatedData(NamedTuple):
         initialization_vector: bytes,
         salt: bytes,
         formatter: Formatter = Formatter.PLAIN_TEXT,
-        open_discussion: bool = False,
-        burn_after_reading: bool = False,
+        mode: Mode | None = None,
         compresssion: Compression = Compression.ZLIB,
     ) -> Self:
         """
@@ -182,10 +181,9 @@ class AuthenticatedData(NamedTuple):
             The salt used for key derivation. Must be provided as raw bytes.
         formatter : Formatter, optional
             The format of the paste content.
-        open_discussion : bool, optional
-            Whether discussions are allowed on the paste.
-        burn_after_reading : bool, optional
-            Whether the paste should be deleted after first read.
+        mode : Mode | None, optional
+            The paste mode. See the `Mode` enum for available variants.
+            Defaults to no mode.
         compresssion : Compression, optional
             Compression algorithm to use for cipher parameters.
 
@@ -198,11 +196,11 @@ class AuthenticatedData(NamedTuple):
         >>> import os
         >>> iv = os.urandom(16)
         >>> salt = os.urandom(8)
-        >>> data = AuthenticatedData.new(initialization_vector=iv, salt=salt, formatter=Formatter.MARKDOWN, open_discussion=True)
+        >>> data = AuthenticatedData.new(initialization_vector=iv, salt=salt, formatter=Formatter.MARKDOWN, mode=Mode.OPEN_DISCUSSION)
         >>> data.formatter
         <Formatter.MARKDOWN: 'markdown'>
-        >>> data.open_discussion
-        True
+        >>> data.mode
+        <Mode.OPEN_DISCUSSION: 'open_discussion'>
         >>> data.cipher_parameters.algorithm
         'aes'
 
@@ -212,8 +210,8 @@ class AuthenticatedData(NamedTuple):
                 initialization_vector=initialization_vector, salt=salt, compression=compresssion
             ),
             formatter=formatter,
-            open_discussion=open_discussion,
-            burn_after_reading=burn_after_reading,
+            open_discussion=mode is Mode.OPEN_DISCUSSION,
+            burn_after_reading=mode is Mode.BURN_AFTER_READING,
         )
 
     def to_serializable_tuple(self) -> tuple[tuple[object, ...], str, int, int]:
@@ -249,6 +247,29 @@ class AuthenticatedData(NamedTuple):
 
         """
         return to_compact_jsonb(self.to_serializable_tuple())
+
+    @property
+    def mode(self) -> Mode | None:
+        """
+        The paste mode derived from the wire-format `open_discussion` and
+        `burn_after_reading` flags.
+
+        Raises
+        ------
+        PrivateBinError
+            If both flags are enabled, which is an impossible state for a valid paste.
+
+        """
+        match (self.open_discussion, self.burn_after_reading):
+            case (False, False):
+                return None
+            case (True, False):
+                return Mode.OPEN_DISCUSSION
+            case (False, True):
+                return Mode.BURN_AFTER_READING
+            case (True, True):
+                msg = "Paste has both 'open_discussion' and 'burn_after_reading' enabled."
+                raise PrivateBinError(msg)
 
 
 class MetaData(msgspec.Struct, frozen=True, kw_only=True):
@@ -525,10 +546,8 @@ class Paste(JsonStruct, frozen=True, kw_only=True):
     """Attachments associated with the paste."""
     formatter: Formatter
     """Formatting option applied to the paste content."""
-    open_discussion: bool
-    """Indicates if open discussions are enabled for this paste."""
-    burn_after_reading: bool
-    """Indicates if the paste is set to be burned after the first read."""
+    mode: Mode | None = None
+    """The paste mode. See the `Mode` enum for available variants."""
     time_to_live: timedelta | None
     """Time duration for which the paste is set to be stored, if any."""
 
