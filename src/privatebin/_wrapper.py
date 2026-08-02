@@ -83,8 +83,7 @@ def create(
         A password to encrypt the paste with an additional layer of security.
         If provided, users will need this password in addition to the passphrase to decrypt the paste.
     mode : Mode | None, optional
-        The paste mode. See the `Mode` enum for available variants.
-        Defaults to no mode.
+        The mode to apply to the paste.
     expiration : Expiration, optional
         The desired expiration time for the paste.
     formatter : Formatter, optional

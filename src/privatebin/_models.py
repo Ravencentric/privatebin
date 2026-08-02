@@ -182,8 +182,7 @@ class AuthenticatedData(NamedTuple):
         formatter : Formatter, optional
             The format of the paste content.
         mode : Mode | None, optional
-            The paste mode. See the `Mode` enum for available variants.
-            Defaults to no mode.
+            The mode to apply to the paste.
         compresssion : Compression, optional
             Compression algorithm to use for cipher parameters.
 
@@ -251,8 +250,7 @@ class AuthenticatedData(NamedTuple):
     @property
     def mode(self) -> Mode | None:
         """
-        The paste behavior, derived from the `open_discussion` and
-        `burn_after_reading` flags.
+        Derived from the `open_discussion` and `burn_after_reading` flags.
 
         Notes
         -----
@@ -550,7 +548,7 @@ class Paste(JsonStruct, frozen=True, kw_only=True):
     formatter: Formatter
     """Formatting option applied to the paste content."""
     mode: Mode | None = None
-    """The paste mode. See the `Mode` enum for available variants."""
+    """The mode applied to the paste."""
     time_to_live: timedelta | None
     """Time duration for which the paste is set to be stored, if any."""
 
