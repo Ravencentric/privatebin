@@ -86,7 +86,9 @@ def test_create_burn_after_reading(pbin_client: PrivateBin) -> None:
 
 
 def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> None:
-    receipt = pbin_client.create("burn secret", feature=Feature.BURN_AFTER_READING, password="hunter2")
+    receipt = pbin_client.create(
+        "burn secret", feature=Feature.BURN_AFTER_READING, password="hunter2"
+    )
     paste = pbin_client.get(
         id=receipt.url.id,
         passphrase=receipt.url.passphrase,
