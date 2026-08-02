@@ -251,13 +251,14 @@ class AuthenticatedData(NamedTuple):
     @property
     def mode(self) -> Mode | None:
         """
-        The paste mode derived from the wire-format `open_discussion` and
+        The paste behavior, derived from the `open_discussion` and
         `burn_after_reading` flags.
 
-        Raises
-        ------
-        PrivateBinError
-            If both flags are enabled, which is an impossible state for a valid paste.
+        Notes
+        -----
+        Both flags being enabled is impossible under the PrivateBin API
+        and violates an invariant of this model. Accessing the property
+        in that state raises an `AssertionError`.
 
         """
         match (self.open_discussion, self.burn_after_reading):
@@ -268,8 +269,10 @@ class AuthenticatedData(NamedTuple):
             case (False, True):
                 return Mode.BURN_AFTER_READING
             case (True, True):
-                msg = "Paste has both 'open_discussion' and 'burn_after_reading' enabled."
-                raise PrivateBinError(msg)
+                assert False, (
+                    "A paste cannot have both 'open_discussion' and "
+                    "'burn_after_reading' enabled."
+                )
 
 
 class MetaData(msgspec.Struct, frozen=True, kw_only=True):
