@@ -7,4 +7,7 @@
 ::: privatebin.Formatter
     options:
       members: true
+::: privatebin.Mode
+    options:
+      members: true
 

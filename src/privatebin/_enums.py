@@ -30,6 +30,21 @@ class Compression(StrEnum):
     NONE = "none"
 
 
+class Mode(StrEnum):
+    """
+    Paste modes for PrivateBin.
+
+    A paste can have at most one mode.
+    They are mutually exclusive, so a paste that
+    burns after reading cannot have open discussions.
+    """
+
+    BURN_AFTER_READING = "burn_after_reading"
+    """The paste is deleted after the first view."""
+    OPEN_DISCUSSION = "open_discussion"
+    """Allow anyone to comment on the paste."""
+
+
 class Expiration(StrEnum):
     """
     Paste expiration durations for PrivateBin.

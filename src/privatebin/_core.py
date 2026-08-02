@@ -12,7 +12,7 @@ import cryptography.exceptions
 import httpx
 
 from privatebin._crypto import decrypt, encrypt
-from privatebin._enums import Compression, Expiration, Formatter, PrivateBinEncryptionSetting
+from privatebin._enums import Compression, Expiration, Formatter, Mode, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._models import (
     Attachment,
@@ -195,8 +195,7 @@ class PrivateBin:
             text=text,
             attachments=attachments,
             formatter=paste.adata.formatter,
-            open_discussion=paste.adata.open_discussion,
-            burn_after_reading=paste.adata.burn_after_reading,
+            mode=paste.adata.mode,
             time_to_live=paste.meta.time_to_live,
         )
 
@@ -206,8 +205,7 @@ class PrivateBin:
         *,
         attachments: Attachment | Iterable[Attachment] | None = None,
         password: str | None = None,
-        burn_after_reading: bool = False,
-        open_discussion: bool = False,
+        mode: Mode | None = None,
         expiration: Expiration = Expiration.ONE_WEEK,
         formatter: Formatter = Formatter.PLAIN_TEXT,
         compression: Compression = Compression.ZLIB,
@@ -224,10 +222,8 @@ class PrivateBin:
         password : str, optional
             A password to encrypt the paste with an additional layer of security.
             If provided, users will need this password in addition to the passphrase to decrypt the paste.
-        burn_after_reading : bool, optional
-            Set to `True` if the paste should be automatically deleted after the first view.
-        open_discussion : bool, optional
-            Set to `True` to enable open discussions/comments on the paste.
+        mode : Mode | None, optional
+            The mode to apply to the paste.
         expiration : Expiration, optional
             The desired expiration time for the paste.
         formatter : Formatter, optional
@@ -244,8 +240,7 @@ class PrivateBin:
         Raises
         ------
         PrivateBinError
-            - If `burn_after_reading` and `open_discussion` are both set to `True`.
-            - If there is an error during paste creation on PrivateBin.
+            If there is an error during paste creation on PrivateBin.
         TypeError
             If provided 'text' is not a `str`.
 
@@ -264,13 +259,13 @@ class PrivateBin:
         Create a paste with Markdown formatting and burn-after-reading:
 
         ```python
-        from privatebin import Formatter, PrivateBin
+        from privatebin import Formatter, Mode, PrivateBin
 
         with PrivateBin() as pb:
             paste = pb.create(
                 text="This *is* **markdown** formatted text.",
                 formatter=Formatter.MARKDOWN,
-                burn_after_reading=True
+                mode=Mode.BURN_AFTER_READING
             )
             print(f"Markdown paste URL: {paste.url}")
         ```
@@ -293,16 +288,10 @@ class PrivateBin:
         """
         assert_type(text, str, param="text")
         assert_type(password, (str, NoneType), param="password")
+        assert_type(mode, (Mode, NoneType), param="mode")
         assert_type(expiration, Expiration, param="expiration")
         assert_type(formatter, Formatter, param="formatter")
         assert_type(compression, Compression, param="compression")
-
-        if burn_after_reading and open_discussion:
-            raise PrivateBinError(
-                "Cannot create a paste with both 'burn_after_reading' and "
-                "'open_discussion' enabled. A paste that burns after reading "
-                "cannot have open discussions."
-            )
 
         data = RawPasteContent(paste=text)
 
@@ -347,8 +336,7 @@ class PrivateBin:
             initialization_vector=initialization_vector,
             salt=salt,
             formatter=formatter,
-            open_discussion=open_discussion,
-            burn_after_reading=burn_after_reading,
+            mode=mode,
             compresssion=compression,
         )
 
