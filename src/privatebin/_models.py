@@ -268,8 +268,7 @@ class AuthenticatedData(NamedTuple):
                 return Mode.BURN_AFTER_READING
             case (True, True):
                 assert False, (
-                    "A paste cannot have both 'open_discussion' and "
-                    "'burn_after_reading' enabled."
+                    "A paste cannot have both 'open_discussion' and 'burn_after_reading' enabled."
                 )
 
 
