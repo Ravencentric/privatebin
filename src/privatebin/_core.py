@@ -12,7 +12,13 @@ import cryptography.exceptions
 import httpx
 
 from privatebin._crypto import decrypt, encrypt
-from privatebin._enums import Compression, Expiration, Formatter, Mode, PrivateBinEncryptionSetting
+from privatebin._enums import (
+    Compression,
+    Expiration,
+    Feature,
+    Formatter,
+    PrivateBinEncryptionSetting,
+)
 from privatebin._errors import PrivateBinError
 from privatebin._models import (
     Attachment,
@@ -195,7 +201,7 @@ class PrivateBin:
             text=text,
             attachments=attachments,
             formatter=paste.adata.formatter,
-            mode=paste.adata.mode,
+            feature=paste.adata.feature,
             time_to_live=paste.meta.time_to_live,
         )
 
@@ -205,7 +211,7 @@ class PrivateBin:
         *,
         attachments: Attachment | Iterable[Attachment] | None = None,
         password: str | None = None,
-        mode: Mode | None = None,
+        feature: Feature | None = None,
         expiration: Expiration = Expiration.ONE_WEEK,
         formatter: Formatter = Formatter.PLAIN_TEXT,
         compression: Compression = Compression.ZLIB,
@@ -222,8 +228,8 @@ class PrivateBin:
         password : str, optional
             A password to encrypt the paste with an additional layer of security.
             If provided, users will need this password in addition to the passphrase to decrypt the paste.
-        mode : Mode | None, optional
-            The mode to apply to the paste.
+        feature : Feature | None, optional
+            The feature to apply to the paste.
         expiration : Expiration, optional
             The desired expiration time for the paste.
         formatter : Formatter, optional
@@ -259,13 +265,13 @@ class PrivateBin:
         Create a paste with Markdown formatting and burn-after-reading:
 
         ```python
-        from privatebin import Formatter, Mode, PrivateBin
+        from privatebin import Feature, Formatter, PrivateBin
 
         with PrivateBin() as pb:
             paste = pb.create(
                 text="This *is* **markdown** formatted text.",
                 formatter=Formatter.MARKDOWN,
-                mode=Mode.BURN_AFTER_READING
+                feature=Feature.BURN_AFTER_READING
             )
             print(f"Markdown paste URL: {paste.url}")
         ```
@@ -288,7 +294,7 @@ class PrivateBin:
         """
         assert_type(text, str, param="text")
         assert_type(password, (str, NoneType), param="password")
-        assert_type(mode, (Mode, NoneType), param="mode")
+        assert_type(feature, (Feature, NoneType), param="feature")
         assert_type(expiration, Expiration, param="expiration")
         assert_type(formatter, Formatter, param="formatter")
         assert_type(compression, Compression, param="compression")
@@ -336,7 +342,7 @@ class PrivateBin:
             initialization_vector=initialization_vector,
             salt=salt,
             formatter=formatter,
-            mode=mode,
+            feature=feature,
             compresssion=compression,
         )
 

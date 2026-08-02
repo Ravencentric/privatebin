@@ -8,13 +8,14 @@ from privatebin import PrivateBin, PrivateBinError
 from privatebin._models import PasteJsonLD
 
 
-def test_create_invalid_mode() -> None:
+def test_create_invalid_feature() -> None:
     client = PrivateBin("https://example.com/")
     errmsg = (
-        "Parameter 'mode' expected one of the following types: 'Mode', 'NoneType', but got 'str'."
+        "Parameter 'feature' expected one of the following types: 'Feature', 'NoneType', "
+        "but got 'str'."
     )
     with pytest.raises(TypeError, match=re.escape(errmsg)):
-        client.create(text="hello world", mode="invalid")  # pyrefly: ignore[bad-argument-type]
+        client.create(text="hello world", feature="invalid")  # pyrefly: ignore[bad-argument-type]
 
 
 @pytest.mark.parametrize("version", [1, 3])

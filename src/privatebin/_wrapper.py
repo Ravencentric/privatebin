@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from urllib.parse import urlparse
 
 from privatebin._core import PrivateBin
-from privatebin._enums import Compression, Expiration, Formatter, Mode
+from privatebin._enums import Compression, Expiration, Feature, Formatter
 from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
 
 
@@ -63,7 +63,7 @@ def create(
     server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",
     attachments: Attachment | Iterable[Attachment] | None = None,
     password: str | None = None,
-    mode: Mode | None = None,
+    feature: Feature | None = None,
     expiration: Expiration = Expiration.ONE_WEEK,
     formatter: Formatter = Formatter.PLAIN_TEXT,
     compression: Compression = Compression.ZLIB,
@@ -82,8 +82,8 @@ def create(
     password : str, optional
         A password to encrypt the paste with an additional layer of security.
         If provided, users will need this password in addition to the passphrase to decrypt the paste.
-    mode : Mode | None, optional
-        The mode to apply to the paste.
+    feature : Feature | None, optional
+        The feature to apply to the paste.
     expiration : Expiration, optional
         The desired expiration time for the paste.
     formatter : Formatter, optional
@@ -117,13 +117,13 @@ def create(
 
     ```python
     import privatebin
-    from privatebin import Formatter, Mode
+    from privatebin import Feature, Formatter
 
     paste = privatebin.create(
         text="This *is* **markdown** formatted text.",
         server="https://myprivatebin.example.org/",
         formatter=Formatter.MARKDOWN,
-        mode=Mode.BURN_AFTER_READING
+        feature=Feature.BURN_AFTER_READING
     )
     print(f"Markdown paste URL: {paste.url}")
     ```
@@ -162,7 +162,7 @@ def create(
             text=text,
             attachments=attachments,
             password=password,
-            mode=mode,
+            feature=feature,
             expiration=expiration,
             formatter=formatter,
             compression=compression,

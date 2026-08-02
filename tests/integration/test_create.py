@@ -6,8 +6,8 @@ from privatebin import (
     Attachment,
     Compression,
     Expiration,
+    Feature,
     Formatter,
-    Mode,
     PrivateBin,
     PrivateBinError,
 )
@@ -63,10 +63,10 @@ def test_create_with_no_compression(pbin_client: PrivateBin) -> None:
 
 
 def test_create_with_open_discussion(pbin_client: PrivateBin) -> None:
-    receipt = pbin_client.create("discuss", mode=Mode.OPEN_DISCUSSION)
+    receipt = pbin_client.create("discuss", feature=Feature.OPEN_DISCUSSION)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "discuss"
-    assert paste.mode is Mode.OPEN_DISCUSSION
+    assert paste.feature is Feature.OPEN_DISCUSSION
 
 
 def test_create_never_expires(pbin_client: PrivateBin) -> None:
@@ -77,23 +77,23 @@ def test_create_never_expires(pbin_client: PrivateBin) -> None:
 
 
 def test_create_burn_after_reading(pbin_client: PrivateBin) -> None:
-    receipt = pbin_client.create("burn", mode=Mode.BURN_AFTER_READING)
+    receipt = pbin_client.create("burn", feature=Feature.BURN_AFTER_READING)
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "burn"
-    assert paste.mode is Mode.BURN_AFTER_READING
+    assert paste.feature is Feature.BURN_AFTER_READING
     with pytest.raises(PrivateBinError):
         pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
 
 
 def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> None:
-    receipt = pbin_client.create("burn secret", mode=Mode.BURN_AFTER_READING, password="hunter2")
+    receipt = pbin_client.create("burn secret", feature=Feature.BURN_AFTER_READING, password="hunter2")
     paste = pbin_client.get(
         id=receipt.url.id,
         passphrase=receipt.url.passphrase,
         password="hunter2",
     )
     assert paste.text == "burn secret"
-    assert paste.mode is Mode.BURN_AFTER_READING
+    assert paste.feature is Feature.BURN_AFTER_READING
     with pytest.raises(PrivateBinError):
         pbin_client.get(
             id=receipt.url.id,
@@ -104,22 +104,24 @@ def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> Non
 
 def test_create_burn_after_reading_with_attachment(pbin_client: PrivateBin) -> None:
     attachment = Attachment(content=b"burn", name="burn.txt")
-    receipt = pbin_client.create("burn text", mode=Mode.BURN_AFTER_READING, attachments=attachment)
+    receipt = pbin_client.create(
+        "burn text", feature=Feature.BURN_AFTER_READING, attachments=attachment
+    )
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "burn text"
     assert len(paste.attachments) == 1
     assert paste.attachments[0].content == b"burn"
-    assert paste.mode is Mode.BURN_AFTER_READING
+    assert paste.feature is Feature.BURN_AFTER_READING
 
 
 def test_create_burn_after_reading_with_markdown(pbin_client: PrivateBin) -> None:
     receipt = pbin_client.create(
-        "# burn", mode=Mode.BURN_AFTER_READING, formatter=Formatter.MARKDOWN
+        "# burn", feature=Feature.BURN_AFTER_READING, formatter=Formatter.MARKDOWN
     )
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "# burn"
     assert paste.formatter is Formatter.MARKDOWN
-    assert paste.mode is Mode.BURN_AFTER_READING
+    assert paste.feature is Feature.BURN_AFTER_READING
 
 
 def test_create_with_multiple_attachments(pbin_client: PrivateBin) -> None:

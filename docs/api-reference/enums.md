@@ -4,10 +4,10 @@
 ::: privatebin.Expiration
     options:
       members: true
-::: privatebin.Formatter
+::: privatebin.Feature
     options:
       members: true
-::: privatebin.Mode
+::: privatebin.Formatter
     options:
       members: true
 

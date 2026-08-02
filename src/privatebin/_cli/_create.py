@@ -8,7 +8,7 @@ from cyclopts import App, Parameter
 from cyclopts.types import ResolvedExistingFile
 
 import privatebin
-from privatebin import Attachment, Expiration, Formatter, Mode
+from privatebin import Attachment, Expiration, Feature, Formatter
 
 create_app = App(
     "create",
@@ -83,7 +83,7 @@ def create(
             server=server,
             attachments=_attachments,
             password=password,
-            mode=Mode.BURN_AFTER_READING if burn else None,
+            feature=Feature.BURN_AFTER_READING if burn else None,
             expiration=Expiration(expiration),
             formatter=_formatter_map[formatter],
         )

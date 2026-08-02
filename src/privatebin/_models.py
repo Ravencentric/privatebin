@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 
 import msgspec
 
-from privatebin._enums import Compression, Formatter, Mode, PrivateBinEncryptionSetting
+from privatebin._enums import Compression, Feature, Formatter, PrivateBinEncryptionSetting
 from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_jsonb
 
@@ -167,7 +167,7 @@ class AuthenticatedData(NamedTuple):
         initialization_vector: bytes,
         salt: bytes,
         formatter: Formatter = Formatter.PLAIN_TEXT,
-        mode: Mode | None = None,
+        feature: Feature | None = None,
         compresssion: Compression = Compression.ZLIB,
     ) -> Self:
         """
@@ -181,8 +181,8 @@ class AuthenticatedData(NamedTuple):
             The salt used for key derivation. Must be provided as raw bytes.
         formatter : Formatter, optional
             The format of the paste content.
-        mode : Mode | None, optional
-            The mode to apply to the paste.
+        feature : Feature | None, optional
+            The feature to apply to the paste.
         compresssion : Compression, optional
             Compression algorithm to use for cipher parameters.
 
@@ -195,11 +195,11 @@ class AuthenticatedData(NamedTuple):
         >>> import os
         >>> iv = os.urandom(16)
         >>> salt = os.urandom(8)
-        >>> data = AuthenticatedData.new(initialization_vector=iv, salt=salt, formatter=Formatter.MARKDOWN, mode=Mode.OPEN_DISCUSSION)
+        >>> data = AuthenticatedData.new(initialization_vector=iv, salt=salt, formatter=Formatter.MARKDOWN, feature=Feature.OPEN_DISCUSSION)
         >>> data.formatter
         <Formatter.MARKDOWN: 'markdown'>
-        >>> data.mode
-        <Mode.OPEN_DISCUSSION: 'open_discussion'>
+        >>> data.feature
+        <Feature.OPEN_DISCUSSION: 'open_discussion'>
         >>> data.cipher_parameters.algorithm
         'aes'
 
@@ -209,8 +209,8 @@ class AuthenticatedData(NamedTuple):
                 initialization_vector=initialization_vector, salt=salt, compression=compresssion
             ),
             formatter=formatter,
-            open_discussion=mode is Mode.OPEN_DISCUSSION,
-            burn_after_reading=mode is Mode.BURN_AFTER_READING,
+            open_discussion=feature is Feature.OPEN_DISCUSSION,
+            burn_after_reading=feature is Feature.BURN_AFTER_READING,
         )
 
     def to_serializable_tuple(self) -> tuple[tuple[object, ...], str, int, int]:
@@ -248,7 +248,7 @@ class AuthenticatedData(NamedTuple):
         return to_compact_jsonb(self.to_serializable_tuple())
 
     @property
-    def mode(self) -> Mode | None:
+    def feature(self) -> Feature | None:
         """
         Derived from the `open_discussion` and `burn_after_reading` flags.
 
@@ -263,9 +263,9 @@ class AuthenticatedData(NamedTuple):
             case (False, False):
                 return None
             case (True, False):
-                return Mode.OPEN_DISCUSSION
+                return Feature.OPEN_DISCUSSION
             case (False, True):
-                return Mode.BURN_AFTER_READING
+                return Feature.BURN_AFTER_READING
             case (True, True):
                 assert False, (
                     "A paste cannot have both 'open_discussion' and 'burn_after_reading' enabled."
@@ -546,8 +546,8 @@ class Paste(JsonStruct, frozen=True, kw_only=True):
     """Attachments associated with the paste."""
     formatter: Formatter
     """Formatting option applied to the paste content."""
-    mode: Mode | None = None
-    """The mode applied to the paste."""
+    feature: Feature | None = None
+    """The feature applied to the paste."""
     time_to_live: timedelta | None
     """Time duration for which the paste is set to be stored, if any."""
 

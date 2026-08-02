@@ -30,11 +30,11 @@ class Compression(StrEnum):
     NONE = "none"
 
 
-class Mode(StrEnum):
+class Feature(StrEnum):
     """
-    Paste modes for PrivateBin.
+    Paste features for PrivateBin.
 
-    A paste can have at most one mode.
+    A paste can have at most one feature.
     They are mutually exclusive, so a paste that
     burns after reading cannot have open discussions.
     """
