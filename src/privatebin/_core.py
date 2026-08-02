@@ -14,10 +14,10 @@ import httpx
 from privatebin._crypto import decrypt, encrypt
 from privatebin._enums import (
     Compression,
+    EncryptionSpec,
     Expiration,
     Feature,
     Formatter,
-    PrivateBinEncryptionSetting,
 )
 from privatebin._errors import PrivateBinError
 from privatebin._models import (
@@ -329,11 +329,11 @@ class PrivateBin:
                     "'Iterable[Attachment]', or 'NoneType'."
                 )
 
-        initialization_vector = os.urandom(PrivateBinEncryptionSetting.TAG_SIZE // 8)
-        salt = os.urandom(PrivateBinEncryptionSetting.SALT_SIZE)
+        initialization_vector = os.urandom(EncryptionSpec.TAG_SIZE // 8)
+        salt = os.urandom(EncryptionSpec.SALT_SIZE)
 
         encoded_password = password.encode() if password else b""
-        passphrase = os.urandom(PrivateBinEncryptionSetting.KEY_SIZE // 8)
+        passphrase = os.urandom(EncryptionSpec.KEY_SIZE // 8)
 
         encoded_data = to_compact_jsonb(data)
         compressed_data = Compressor(mode=compression).compress(encoded_data)
@@ -348,9 +348,9 @@ class PrivateBin:
 
         encrypted = encrypt(
             data=compressed_data,
-            length=PrivateBinEncryptionSetting.KEY_SIZE // 8,
+            length=EncryptionSpec.KEY_SIZE // 8,
             salt=salt,
-            iterations=PrivateBinEncryptionSetting.ITERATIONS,
+            iterations=EncryptionSpec.ITERATIONS,
             key_material=passphrase + encoded_password,
             initialization_vector=initialization_vector,
             associated_data=adata.to_bytes(),

@@ -65,8 +65,13 @@ class Expiration(StrEnum):
     NEVER = "never"
 
 
-class PrivateBinEncryptionSetting(IntEnum):
-    """Encryption parameters for PrivateBin."""
+class EncryptionSpec(IntEnum):
+    """
+    Encryption parameters for PrivateBin.
+
+    Values the server accepts, used as the defaults
+    for ``CipherParameters.new()``.
+    """
 
     # "A good default is at least 1,000,000 iterations" - https://cryptography.io/en/latest/fernet/
     ITERATIONS = 1_000_000

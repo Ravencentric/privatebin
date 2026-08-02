@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 
 import msgspec
 
-from privatebin._enums import Compression, Feature, Formatter, PrivateBinEncryptionSetting
+from privatebin._enums import Compression, EncryptionSpec, Feature, Formatter
 from privatebin._errors import PrivateBinError
 from privatebin._utils import guess_mime_type, to_compact_jsonb
 
@@ -139,9 +139,9 @@ class CipherParameters(NamedTuple):
         return cls(
             initialization_vector=initialization_vector,
             salt=salt,
-            iterations=PrivateBinEncryptionSetting.ITERATIONS,
-            key_size=PrivateBinEncryptionSetting.KEY_SIZE,
-            tag_size=PrivateBinEncryptionSetting.TAG_SIZE,
+            iterations=EncryptionSpec.ITERATIONS,
+            key_size=EncryptionSpec.KEY_SIZE,
+            tag_size=EncryptionSpec.TAG_SIZE,
             algorithm="aes",
             mode="gcm",
             compression=compression,
