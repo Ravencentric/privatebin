@@ -47,6 +47,21 @@ class Compressor:
                 raise TypeError(msg)
 
 
+def urljoin(server: str, paste_id: str, passphrase: str) -> str:
+    """
+    Build a PrivateBin URL string with the given passphrase at the end.
+
+    The stdlib `urllib.parse.urljoin` is not suitable for this. Joining
+    `/?id#key` onto the server URL makes the leading slash replace the
+    server's path instead of keeping it, breaking instances hosted in a
+    subdirectory like `https://example.com/privatebin/`. Joining it without
+    the slash appends the `?` straight onto the path when the server URL
+    has no trailing slash.
+    """
+    base = f"{server.rstrip('/')}/?{paste_id}"
+    return base if not passphrase else f"{base}#{passphrase}"
+
+
 def to_compact_jsonb(obj: object) -> bytes:
     """
     Serialize a Python object to a compact UTF-8 encoded JSON byte string.

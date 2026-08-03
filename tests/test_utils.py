@@ -5,7 +5,13 @@ import types
 import pytest
 
 from privatebin import Compression
-from privatebin._utils import Compressor, assert_type, guess_mime_type, to_compact_jsonb
+from privatebin._utils import (
+    Compressor,
+    assert_type,
+    guess_mime_type,
+    to_compact_jsonb,
+    urljoin,
+)
 
 
 @pytest.mark.parametrize("mode", tuple(Compression))
@@ -14,6 +20,29 @@ def test_compressor(mode: Compression) -> None:
     compressed = Compressor(mode=mode).compress(original)
     decompressed = Compressor(mode=mode).decompress(compressed)
     assert original == decompressed
+
+
+@pytest.mark.parametrize(
+    ("server", "paste_id", "passphrase", "expected"),
+    [
+        ("https://example.com/", "pasteid", "secret", "https://example.com/?pasteid#secret"),
+        (
+            "https://example.com/privatebin/",
+            "pasteid",
+            "secret",
+            "https://example.com/privatebin/?pasteid#secret",
+        ),
+        (
+            "https://example.com/privatebin",
+            "pasteid",
+            "secret",
+            "https://example.com/privatebin/?pasteid#secret",
+        ),
+        ("https://example.com/", "pasteid", "", "https://example.com/?pasteid"),
+    ],
+)
+def test_urljoin(server: str, paste_id: str, passphrase: str, expected: str) -> None:
+    assert urljoin(server, paste_id, passphrase) == expected
 
 
 def test_bad_compression() -> None:

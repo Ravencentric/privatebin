@@ -5,13 +5,12 @@ import re
 from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypedDict
-from urllib.parse import urljoin
 
 import msgspec
 
 from privatebin._enums import Compression, EncryptionSpec, Feature, Formatter
 from privatebin._errors import PrivateBinError
-from privatebin._utils import guess_mime_type, to_compact_jsonb
+from privatebin._utils import guess_mime_type, to_compact_jsonb, urljoin
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -593,7 +592,29 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         'https://example.privatebin.com/?pasteid#secret'
 
         """
-        return urljoin(self.server, f"/?{self.id}#{self.passphrase}")
+        return urljoin(self.server, self.id, self.passphrase)
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize this instance into a JSON string.
+
+        Parameters
+        ----------
+        indent : int, optional
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
+            or negative to minimize size by removing extra whitespace.
+
+        Returns
+        -------
+        str
+            JSON string representing the URL.
+
+        Warnings
+        --------
+        The serialized JSON contains the passphrase in plain text.
+        """
+        return super().to_json(indent=indent)
 
     @classmethod
     def parse(cls, url: str | PrivateBinUrl | PasteReceipt, /) -> Self:
@@ -659,7 +680,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         'https://example.com/privatebin/?pasteid#********'
 
         """
-        return self.unmask().replace(self.passphrase, "********")
+        return urljoin(self.server, self.id, "********")
 
     def __repr__(self) -> str:
         """
@@ -708,3 +729,27 @@ class PasteReceipt(JsonStruct, frozen=True, kw_only=True):
         """
         yield "url", self.url
         yield "delete_token", "********"
+
+    def to_json(self, *, indent: int = 2) -> str:
+        """
+        Serialize this instance into a JSON string.
+
+        Parameters
+        ----------
+        indent : int, optional
+            Number of spaces for indentation.
+            Set to 0 for a single line with spacing,
+            or negative to minimize size by removing extra whitespace.
+
+        Returns
+        -------
+        str
+            JSON string representing the receipt.
+
+        Warnings
+        --------
+        The serialized JSON contains the delete
+        token and the passphrase in plain text.
+
+        """
+        return super().to_json(indent=indent)

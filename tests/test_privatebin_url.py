@@ -57,6 +57,37 @@ def test_privatebin_url_eq() -> None:
     assert PrivateBinUrl.parse(original) == PrivateBinUrl.parse(receipt) == original
 
 
+@pytest.mark.parametrize(
+    ("server", "passphrase", "unmasked", "masked"),
+    [
+        (
+            "https://example.com/privatebin/",
+            "secret",
+            "https://example.com/privatebin/?pasteid#secret",
+            "https://example.com/privatebin/?pasteid#********",
+        ),
+        (
+            "https://example.com/",
+            "",
+            "https://example.com/?pasteid",
+            "https://example.com/?pasteid#********",
+        ),
+        (
+            "https://example.com/",
+            "ex",
+            "https://example.com/?pasteid#ex",
+            "https://example.com/?pasteid#********",
+        ),
+    ],
+)
+def test_privatebin_url_mask_and_unmask(
+    server: str, passphrase: str, unmasked: str, masked: str
+) -> None:
+    url = PrivateBinUrl(server=server, id="pasteid", passphrase=passphrase)
+    assert url.unmask() == unmasked
+    assert str(url) == masked
+
+
 def test_privatebin_url_error() -> None:
     with pytest.raises(ValueError):
         PrivateBinUrl.parse("https://example.com")
