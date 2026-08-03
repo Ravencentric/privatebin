@@ -11,6 +11,6 @@ def test_version() -> None:
     pyproject = Path(__file__).parent.parent / "pyproject.toml"
     assert pyproject.is_file()
     with open(pyproject, "rb") as f:
-        version = tomli.load(f)["project"]["version"]
+        version: str = tomli.load(f)["project"]["version"]
 
     assert version == __version__

@@ -80,6 +80,8 @@ project-includes = ["src/**/*.py", "tests/**/*.py"]
 missing-override-decorator = false
 not-required-key-access = false
 explicit-any = false
+implicit-bool = false
+unused-call-result = false
 
 [tool.pytest]
 addopts = ["--disable-socket", "--allow-hosts=127.0.0.1", "--showlocals", "-ra"]
