@@ -413,16 +413,9 @@ class JsonStruct(msgspec.Struct, frozen=True, kw_only=True):
         """
         return msgspec.json.decode(data, type=cls)
 
-    def to_json(self, *, indent: int = 2) -> str:
+    def to_json(self) -> str:
         """
         Serialize this instance into a JSON string.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
@@ -431,7 +424,7 @@ class JsonStruct(msgspec.Struct, frozen=True, kw_only=True):
 
         """
         jsonified = msgspec.json.encode(self)
-        return msgspec.json.format(jsonified, indent=indent).decode()
+        return msgspec.json.format(jsonified, indent=2).decode()
 
 
 class Attachment(JsonStruct, frozen=True, kw_only=True):
@@ -594,16 +587,9 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         """
         return urljoin(self.server, self.id, self.passphrase)
 
-    def to_json(self, *, indent: int = 2) -> str:
+    def to_json(self) -> str:
         """
         Serialize this instance into a JSON string.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
@@ -614,7 +600,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         --------
         The serialized JSON contains the passphrase in plain text.
         """
-        return super().to_json(indent=indent)
+        return super().to_json()
 
     @classmethod
     def parse(cls, url: str | PrivateBinUrl | PasteReceipt, /) -> Self:
@@ -730,16 +716,9 @@ class PasteReceipt(JsonStruct, frozen=True, kw_only=True):
         yield "url", self.url
         yield "delete_token", "********"
 
-    def to_json(self, *, indent: int = 2) -> str:
+    def to_json(self) -> str:
         """
         Serialize this instance into a JSON string.
-
-        Parameters
-        ----------
-        indent : int, optional
-            Number of spaces for indentation.
-            Set to 0 for a single line with spacing,
-            or negative to minimize size by removing extra whitespace.
 
         Returns
         -------
@@ -752,4 +731,4 @@ class PasteReceipt(JsonStruct, frozen=True, kw_only=True):
         token and the passphrase in plain text.
 
         """
-        return super().to_json(indent=indent)
+        return super().to_json()
