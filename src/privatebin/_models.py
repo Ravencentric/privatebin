@@ -167,7 +167,7 @@ class AuthenticatedData(NamedTuple):
         salt: bytes,
         formatter: Formatter = Formatter.PLAIN_TEXT,
         feature: Feature | None = None,
-        compresssion: Compression = Compression.ZLIB,
+        compression: Compression = Compression.ZLIB,
     ) -> Self:
         """
         Create a new AuthenticatedData instance with specified parameters.
@@ -182,7 +182,7 @@ class AuthenticatedData(NamedTuple):
             The format of the paste content.
         feature : Feature | None, optional
             The feature to apply to the paste.
-        compresssion : Compression, optional
+        compression : Compression, optional
             Compression algorithm to use for cipher parameters.
 
         Returns
@@ -205,7 +205,7 @@ class AuthenticatedData(NamedTuple):
         """
         return cls(
             cipher_parameters=CipherParameters.new(
-                initialization_vector=initialization_vector, salt=salt, compression=compresssion
+                initialization_vector=initialization_vector, salt=salt, compression=compression
             ),
             formatter=formatter,
             open_discussion=feature is Feature.OPEN_DISCUSSION,

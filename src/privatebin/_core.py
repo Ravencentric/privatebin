@@ -342,7 +342,7 @@ class PrivateBin:
             salt=salt,
             formatter=formatter,
             feature=feature,
-            compresssion=compression,
+            compression=compression,
         )
 
         encrypted = encrypt(
