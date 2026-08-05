@@ -53,34 +53,6 @@ class CipherParameters(NamedTuple):
     Therefore, when we access `cipher_parameters.salt` and
     `cipher_parameters.initialization_vector`, we are working with the
     *raw bytes* of the `salt` and `initialization_vector`.
-
-    Examples
-    --------
-    ```python
-    import base64
-    import os
-
-    import msgspec
-
-
-    class ApiResponse(msgspec.Struct):
-        iv: bytes
-        salt: bytes
-
-
-    raw_iv_bytes = os.urandom(16)
-    raw_salt_bytes = os.urandom(8)
-
-    base64_iv_str = base64.b64encode(raw_iv_bytes).decode()
-    base64_salt_str = base64.b64encode(raw_salt_bytes).decode()
-
-    api_response_dict = {"iv": base64_iv_str, "salt": base64_salt_str}
-    parsed_response = msgspec.convert(api_response_dict, type=ApiResponse)
-
-    assert parsed_response.iv == raw_iv_bytes == base64.b64decode(base64_iv_str)
-    assert parsed_response.salt == raw_salt_bytes == base64.b64decode(base64_salt_str)
-    ```
-
     """
 
     initialization_vector: bytes
