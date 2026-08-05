@@ -34,7 +34,7 @@ class HttpClientProtocol(Protocol):
         contract and why it exists.
 
         Any object implementing this Protocol *should* be able to function as a
-        client for [`PrivateBin`][privatebin.PrivateBin]. I do test that several
+        client for [`PrivateBin`][privatebin.PrivateBin]. I do test that a few
         HTTP clients statically satisfy this Protocol, but I only run
         PrivateBin's actual client tests against the one I depend on
         (used to be `httpx`, now `httpx2`).
@@ -51,12 +51,6 @@ class HttpClientProtocol(Protocol):
         So this Protocol is what I came up with to let PrivateBin switch to
         httpx2 without causing superfluous static type errors for clients that
         are already perfectly compatible.
-
-        `httpx`, `httpx2`, and possibly other HTTP clients are interchangeable for
-        what PrivateBin needs because it only relies on common HTTP
-        functionality, nothing client-specific. That doesn't mean I guarantee
-        runtime compatibility with every client satisfying this Protocol,
-        though.
     """
 
     @property
