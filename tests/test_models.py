@@ -4,12 +4,19 @@ import base64
 import os
 import re
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from privatebin import Attachment, Feature, Formatter, Paste, PrivateBinUrl
-from privatebin._models import AuthenticatedData
+from privatebin import (
+    Attachment,
+    Compression,
+    Feature,
+    Formatter,
+    Paste,
+    PrivateBinError,
+)
+from privatebin._models import AuthenticatedData, PasteJsonLD
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -123,10 +130,73 @@ def test_authenticated_data_feature_roundtrip(feature: Feature | None) -> None:
     assert data.burn_after_reading is (feature is Feature.BURN_AFTER_READING)
 
 
-def test_privatebin_url_json_roundtrip() -> None:
-    url = PrivateBinUrl(
-        server="https://privatebin.net/",
-        id="abcdef",
-        passphrase="secret",
-    )
-    assert PrivateBinUrl.from_json(url.to_json()) == url
+def test_from_response_parses_full_paste_json_ld_shape() -> None:
+    iv = os.urandom(16)
+    salt = os.urandom(8)
+    ct = os.urandom(32)
+
+    response: dict[str, Any] = {
+        "status": 0,
+        "id": "4e7cea11af458924",
+        "url": "/?4e7cea11af458924",
+        "adata": [
+            [
+                base64.b64encode(iv).decode(),
+                base64.b64encode(salt).decode(),
+                100000,
+                256,
+                128,
+                "aes",
+                "gcm",
+                "zlib",
+            ],
+            "plaintext",
+            0,
+            1,
+        ],
+        "meta": {"time_to_live": 86315},
+        "v": 2,
+        "ct": base64.b64encode(ct).decode(),
+    }
+
+    paste = PasteJsonLD.from_response(response)
+
+    assert paste.status == 0
+    assert paste.id == "4e7cea11af458924"
+    assert paste.url == "/?4e7cea11af458924"
+    assert paste.v == 2
+    assert paste.ct == ct
+
+    cipher_parameters = paste.adata.cipher_parameters
+    assert cipher_parameters.initialization_vector == iv
+    assert cipher_parameters.salt == salt
+    assert cipher_parameters.iterations == 100000
+    assert cipher_parameters.key_size == 256
+    assert cipher_parameters.tag_size == 128
+    assert cipher_parameters.algorithm == "aes"
+    assert cipher_parameters.mode == "gcm"
+    assert cipher_parameters.compression is Compression.ZLIB
+
+    assert paste.adata.formatter is Formatter.PLAIN_TEXT
+    assert paste.adata.open_discussion is False
+    assert paste.adata.burn_after_reading is True
+    assert paste.adata.feature is Feature.BURN_AFTER_READING
+
+    assert paste.meta.time_to_live == timedelta(seconds=86315)
+
+
+@pytest.mark.parametrize("version", [1, 3])
+def test_from_response_unsupported_api_version(version: int) -> None:
+    response: dict[str, object] = {"status": 0, "v": version}
+    with pytest.raises(
+        PrivateBinError,
+        match=re.escape(
+            f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {version}"
+        ),
+    ):
+        PasteJsonLD.from_response(response)
+
+
+def test_from_response_error() -> None:
+    with pytest.raises(PrivateBinError, match="Something went terribly wrong!"):
+        PasteJsonLD.from_response({"status": 1, "message": "Something went terribly wrong!"})

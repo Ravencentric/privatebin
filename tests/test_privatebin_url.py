@@ -94,3 +94,12 @@ def test_privatebin_url_error() -> None:
 
     with pytest.raises(TypeError):
         PrivateBinUrl.parse(None)  # pyrefly: ignore[bad-argument-type]
+
+
+def test_privatebin_url_json_roundtrip() -> None:
+    url = PrivateBinUrl(
+        server="https://privatebin.net/",
+        id="abcdef",
+        passphrase="secret",
+    )
+    assert PrivateBinUrl.from_json(url.to_json()) == url

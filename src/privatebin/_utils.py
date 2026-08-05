@@ -26,7 +26,9 @@ class Compressor:
             case Compression.NONE:
                 return data
             case _:
-                assert False, f"Unreachable compression mode: {self.mode!r}"
+                supported = ", ".join(f"{c.name!r}" for c in Compression)
+                msg = f"Unsupported compression mode: {self.mode!r}. Supported modes are: {supported}"
+                raise TypeError(msg)
 
     def decompress(self, data: bytes) -> bytes:
         """Decompress the input data."""
@@ -40,7 +42,9 @@ class Compressor:
             case Compression.NONE:
                 return data
             case _:
-                assert False, f"Unreachable compression mode: {self.mode!r}"
+                supported = ", ".join(f"{c.name!r}" for c in Compression)
+                msg = f"Unsupported compression mode: {self.mode!r}. Supported modes are: {supported}"
+                raise TypeError(msg)
 
 
 def urljoin(server: str, paste_id: str, passphrase: str) -> str:
