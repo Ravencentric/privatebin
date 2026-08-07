@@ -74,19 +74,17 @@ def register(parser: argparse.ArgumentParser) -> None:
 @suppress_traceback
 def run(args: argparse.Namespace) -> int:
     attachments = (
-        tuple(Attachment.from_file(file) for file in args.attachment)  # pyrefly: ignore[unknown-argument-type]
-        if args.attachment
-        else None
+        tuple(Attachment.from_file(file) for file in args.attachment) if args.attachment else None
     )
     text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
     receipt = privatebin.create(
         text=text.strip(),
-        server=args.server,  # pyrefly: ignore[unknown-argument-type]
+        server=args.server,
         attachments=attachments,
-        password=args.password,  # pyrefly: ignore[unknown-argument-type]
+        password=args.password,
         feature=Feature.BURN_AFTER_READING if args.burn else None,
-        expiration=Expiration(args.expiration),  # pyrefly: ignore[unknown-argument-type]
+        expiration=Expiration(args.expiration),
         formatter=FORMATTERS[args.formatter],
     )
 
