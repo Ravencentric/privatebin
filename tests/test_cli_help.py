@@ -24,7 +24,7 @@ Commands:
 
 Options:
   -h, --help           Print help
-      --version        Print version
+  -V, --version        Print version
 """
 
 CREATE_HELP = """\
