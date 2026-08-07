@@ -84,7 +84,7 @@ def cli(argv: Sequence[str], capsys: pytest.CaptureFixture[str]) -> tuple[int, s
 
 
 @pytest.mark.parametrize(
-    ("argv", "help"),
+    ("argv", "expected"),
     [
         (["-h"], TOP_LEVEL_HELP),
         (["--help"], TOP_LEVEL_HELP),
@@ -94,10 +94,10 @@ def cli(argv: Sequence[str], capsys: pytest.CaptureFixture[str]) -> tuple[int, s
     ],
     ids=["args: -h", "args: --help", "args: create -h", "args: get -h", "args: delete -h"],
 )
-def test_help(argv: list[str], help: str, capsys: pytest.CaptureFixture[str]) -> None:
+def test_help(argv: list[str], expected: str, capsys: pytest.CaptureFixture[str]) -> None:
     code, out, err = cli(argv, capsys)
     assert code == 0
-    assert out == help
+    assert out == expected
     assert err == ""
 
 

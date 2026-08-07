@@ -1,18 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import sys
-from typing import Protocol
+from typing import Any
 
 import privatebin
-
-
-class GetArgs(Protocol):
-    """Shape of the parsed 'get' arguments."""
-
-    url: str
-    password: str | None
-    json: bool
+from privatebin._cli._common import suppress_traceback
 
 
 def register(parser: argparse.ArgumentParser) -> None:
@@ -24,16 +16,13 @@ def register(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-p", "--password", help="Password for password-protected pastes")
 
 
-def run(args: GetArgs) -> int:
-    try:
-        paste = privatebin.get(args.url.strip(), password=args.password)
+@suppress_traceback
+def run(args: Any) -> int:
+    paste = privatebin.get(args.url.strip(), password=args.password)
 
-        if args.json:
-            print(paste.to_json())
-        else:
-            print(paste.text)
+    if args.json:
+        print(paste.to_json())
+    else:
+        print(paste.text)
 
-        return 0
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        return 1
+    return 0

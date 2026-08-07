@@ -1,17 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import sys
-from typing import Protocol
+from typing import Any
 
 import privatebin
-
-
-class DeleteArgs(Protocol):
-    """Shape of the parsed 'delete' arguments."""
-
-    url: str
-    token: str
+from privatebin._cli._common import suppress_traceback
 
 
 def register(parser: argparse.ArgumentParser) -> None:
@@ -25,10 +18,7 @@ def register(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def run(args: DeleteArgs) -> int:
-    try:
-        privatebin.delete(args.url.strip(), delete_token=args.token)
-        return 0
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        return 1
+@suppress_traceback
+def run(args: Any) -> int:
+    privatebin.delete(args.url.strip(), delete_token=args.token)
+    return 0

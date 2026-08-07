@@ -4,13 +4,13 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Protocol
+from typing import Any
 
 import privatebin
 from privatebin import Attachment, Expiration, Feature, Formatter
+from privatebin._cli._common import suppress_traceback
 
 EXPIRATIONS = tuple(member.value for member in Expiration)
-
 FORMATTERS = {
     "text": Formatter.PLAIN_TEXT,
     "markdown": Formatter.MARKDOWN,
@@ -18,25 +18,12 @@ FORMATTERS = {
 }
 
 
-class CreateArgs(Protocol):
-    """Shape of the parsed 'create' arguments."""
-
-    text: str | None
-    server: str
-    attachment: list[Path] | None
-    password: str | None
-    burn: bool
-    expiration: str
-    formatter: str
-    json: bool
-
-
 def existing_file(value: str) -> Path:
     """Argparse type: resolve the path and reject non-existent files."""
-    file = Path(value).expanduser().resolve()
-    if not file.is_file():
+    path = Path(value).expanduser().resolve()
+    if not path.is_file():
         raise argparse.ArgumentTypeError(f"'{value}' is not an existing file")
-    return file
+    return path
 
 
 def register(parser: argparse.ArgumentParser) -> None:
@@ -58,13 +45,13 @@ def register(parser: argparse.ArgumentParser) -> None:
         "-e",
         "--expiration",
         choices=EXPIRATIONS,
-        default="1week",
+        default="1day",
         help="The desired expiration time for the paste (%(choices)s)",
     )
     parser.add_argument(
         "-f",
         "--formatter",
-        choices=("text", "markdown", "code"),
+        choices=FORMATTERS.keys(),
         default="text",
         help="The formatting option for the paste content (%(choices)s)",
     )
@@ -85,31 +72,26 @@ def register(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("text", nargs="?", default=None, help="The text content of the paste")
 
 
-def run(args: CreateArgs) -> int:
-    try:
-        attachments = (
-            tuple(Attachment.from_file(file) for file in args.attachment)
-            if args.attachment
-            else None
-        )
-        text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
+@suppress_traceback
+def run(args: Any) -> int:
+    attachments = (
+        tuple(Attachment.from_file(file) for file in args.attachment) if args.attachment else None
+    )
+    text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
-        receipt = privatebin.create(
-            text=text.strip(),
-            server=args.server,
-            attachments=attachments,
-            password=args.password,
-            feature=Feature.BURN_AFTER_READING if args.burn else None,
-            expiration=Expiration(args.expiration),
-            formatter=FORMATTERS[args.formatter],
-        )
+    receipt = privatebin.create(
+        text=text.strip(),
+        server=args.server,
+        attachments=attachments,
+        password=args.password,
+        feature=Feature.BURN_AFTER_READING if args.burn else None,
+        expiration=Expiration(args.expiration),
+        formatter=FORMATTERS[args.formatter],
+    )
 
-        if args.json:
-            print(receipt.to_json())
-        else:
-            print(receipt.url.unmask())
+    if args.json:
+        print(receipt.to_json())
+    else:
+        print(receipt.url.unmask())
 
-        return 0
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        return 1
+    return 0
