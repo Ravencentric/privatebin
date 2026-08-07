@@ -22,6 +22,7 @@ on:
 
 env:
   FORCE_COLOR: 1
+  PYTHON_COLORS: 0
   UV_LOCKED: 1
 
 defaults:
