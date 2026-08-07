@@ -1,56 +1,39 @@
 from __future__ import annotations
 
-from typing import Annotated
-
-import rich
-from cyclopts import App, Parameter
-from cyclopts.types import URL
+import argparse
+import sys
+from typing import Protocol
 
 import privatebin
 
-get_app = App(
-    "get",
-    help="Retrieve and decrypt a paste from a PrivateBin URL.",
-)
+
+class GetArgs(Protocol):
+    """Shape of the parsed 'get' arguments."""
+
+    url: str
+    password: str | None
+    json: bool
 
 
-@get_app.default
-def get(
-    url: URL,
-    /,
-    *,
-    password: Annotated[str | None, Parameter(name=["--password", "-p"])] = None,
-    json: bool = False,
-    pretty: bool = False,
-) -> int:
-    """
-    Retrieve and decrypt a paste from a PrivateBin URL.
+def register(parser: argparse.ArgumentParser) -> None:
+    """Register the 'get' subcommand's arguments."""
+    parser.add_argument("url", help="PrivateBin URL of the paste to retrieve")
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output paste data in JSON format"
+    )
+    parser.add_argument("-p", "--password", help="Password for password-protected pastes")
 
-    Parameters
-    ----------
-    url : URL
-        PrivateBin URL of the paste to retrieve.
-    password : str, optional
-        Password for password-protected pastes.
-    json : bool, optional
-        Output paste data in JSON format.
-    pretty : bool, optional
-        Pretty-print JSON output.
 
-    """
+def run(args: GetArgs) -> int:
     try:
-        paste = privatebin.get(url.strip(), password=password)
+        paste = privatebin.get(args.url.strip(), password=args.password)
 
-        if json:
-            if pretty:
-                rich.print_json(paste.to_json())
-            else:
-                print(paste.to_json())
+        if args.json:
+            print(paste.to_json())
         else:
             print(paste.text)
 
         return 0
-
     except Exception as e:
-        rich.print(f"[red]Error:[/] {e}")
+        print(f"Error: {e}", file=sys.stderr)
         return 1

@@ -29,10 +29,7 @@ Documentation = "https://ravencentric.cc/privatebin/"
 Repository = "https://github.com/Ravencentric/privatebin"
 
 [project.scripts]
-privatebin = "privatebin.__main__:app"
-
-[project.optional-dependencies]
-cli = ["cyclopts>=3.10.0", "rich>=13.9.4"]
+privatebin = "privatebin.__main__:main"
 
 [dependency-groups]
 dev = [
