@@ -21,8 +21,7 @@ on:
   workflow_call:
 
 env:
-  FORCE_COLOR: 1
-  PYTHON_COLORS: 0
+  NO_COLOR: 1
   UV_LOCKED: 1
 
 defaults:
