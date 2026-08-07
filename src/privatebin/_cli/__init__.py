@@ -34,6 +34,7 @@ class PrivateBinArgumentParser(argparse.ArgumentParser):
             usage="%(prog)s [-h] [--version] [create | get | delete] ...",
         )
         parser.add_argument(
+            "-V",
             "--version",
             action="version",
             version=f"%(prog)s {__version__}",
