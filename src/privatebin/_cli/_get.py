@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import argparse
-from typing import Any
+from typing import TYPE_CHECKING
 
 import privatebin
 from privatebin._cli._common import suppress_traceback
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def register(parser: argparse.ArgumentParser) -> None:
@@ -17,8 +19,8 @@ def register(parser: argparse.ArgumentParser) -> None:
 
 
 @suppress_traceback
-def run(args: Any) -> int:
-    paste = privatebin.get(args.url.strip(), password=args.password)
+def run(args: argparse.Namespace) -> int:
+    paste = privatebin.get(args.url.strip(), password=args.password)  # pyrefly: ignore[unknown-argument-type]
 
     if args.json:
         print(paste.to_json())

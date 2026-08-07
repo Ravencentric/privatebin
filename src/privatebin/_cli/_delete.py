@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import argparse
-from typing import Any
+from typing import TYPE_CHECKING
 
 import privatebin
 from privatebin._cli._common import suppress_traceback
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def register(parser: argparse.ArgumentParser) -> None:
@@ -19,6 +21,6 @@ def register(parser: argparse.ArgumentParser) -> None:
 
 
 @suppress_traceback
-def run(args: Any) -> int:
-    privatebin.delete(args.url.strip(), delete_token=args.token)
+def run(args: argparse.Namespace) -> int:
+    privatebin.delete(args.url.strip(), delete_token=args.token)  # pyrefly: ignore[unknown-argument-type]
     return 0

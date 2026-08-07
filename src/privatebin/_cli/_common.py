@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable
-from typing import ParamSpec
+from typing import TYPE_CHECKING, ParamSpec
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 P = ParamSpec("P")
 

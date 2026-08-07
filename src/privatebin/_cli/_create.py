@@ -4,7 +4,6 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 import privatebin
 from privatebin import Attachment, Expiration, Feature, Formatter
@@ -73,19 +72,21 @@ def register(parser: argparse.ArgumentParser) -> None:
 
 
 @suppress_traceback
-def run(args: Any) -> int:
+def run(args: argparse.Namespace) -> int:
     attachments = (
-        tuple(Attachment.from_file(file) for file in args.attachment) if args.attachment else None
+        tuple(Attachment.from_file(file) for file in args.attachment)  # pyrefly: ignore[unknown-argument-type]
+        if args.attachment
+        else None
     )
     text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
     receipt = privatebin.create(
         text=text.strip(),
-        server=args.server,
+        server=args.server,  # pyrefly: ignore[unknown-argument-type]
         attachments=attachments,
-        password=args.password,
+        password=args.password,  # pyrefly: ignore[unknown-argument-type]
         feature=Feature.BURN_AFTER_READING if args.burn else None,
-        expiration=Expiration(args.expiration),
+        expiration=Expiration(args.expiration),  # pyrefly: ignore[unknown-argument-type]
         formatter=FORMATTERS[args.formatter],
     )
 

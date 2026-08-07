@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
-from typing import Any, Self
+from typing import TYPE_CHECKING
 
 from privatebin._cli import _create, _delete, _get
 from privatebin._cli._help import ClapLikeHelpFormatter
 from privatebin._version import __version__
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from typing import Any
+
+    from typing_extensions import Self
 
 __all__ = ("main",)
 

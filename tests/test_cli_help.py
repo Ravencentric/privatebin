@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import os
 import shutil
-from collections.abc import Sequence
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
 from privatebin.__main__ import main
 from privatebin._version import __version__
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 TOP_LEVEL_HELP = """\
 Usage: privatebin [-h] [--version] [create | get | delete] ...
