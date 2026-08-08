@@ -1,56 +1,30 @@
 from __future__ import annotations
 
-from typing import Annotated
-
-import rich
-from cyclopts import App, Parameter
-from cyclopts.types import URL
+from typing import TYPE_CHECKING
 
 import privatebin
+from privatebin._cli._common import suppress_traceback
 
-get_app = App(
-    "get",
-    help="Retrieve and decrypt a paste from a PrivateBin URL.",
-)
+if TYPE_CHECKING:
+    import argparse
 
 
-@get_app.default
-def get(
-    url: URL,
-    /,
-    *,
-    password: Annotated[str | None, Parameter(name=["--password", "-p"])] = None,
-    json: bool = False,
-    pretty: bool = False,
-) -> int:
-    """
-    Retrieve and decrypt a paste from a PrivateBin URL.
+def register(parser: argparse.ArgumentParser) -> None:
+    """Register the 'get' subcommand's arguments."""
+    parser.add_argument("url", help="PrivateBin URL of the paste to retrieve")
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output paste data in JSON format"
+    )
+    parser.add_argument("-p", "--password", help="Password for password-protected pastes")
 
-    Parameters
-    ----------
-    url : URL
-        PrivateBin URL of the paste to retrieve.
-    password : str, optional
-        Password for password-protected pastes.
-    json : bool, optional
-        Output paste data in JSON format.
-    pretty : bool, optional
-        Pretty-print JSON output.
 
-    """
-    try:
-        paste = privatebin.get(url.strip(), password=password)
+@suppress_traceback
+def run(args: argparse.Namespace) -> int:
+    paste = privatebin.get(args.url.strip(), password=args.password)  # pyrefly: ignore[unknown-argument-type]
 
-        if json:
-            if pretty:
-                rich.print_json(paste.to_json())
-            else:
-                print(paste.to_json())
-        else:
-            print(paste.text)
+    if args.json:
+        print(paste.to_json())
+    else:
+        print(paste.text)
 
-        return 0
-
-    except Exception as e:
-        rich.print(f"[red]Error:[/] {e}")
-        return 1
+    return 0
