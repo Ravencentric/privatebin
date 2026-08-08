@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -59,14 +60,17 @@ class ClapLikeHelpFormatter(argparse.HelpFormatter):
         return super()._metavar_formatter(action, default_metavar)
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
-        # Pad long-only flags so they align with flags that also have a short name:
-        #
-        #     -h, --help
-        #         --version
-        #
-        # Without the padding, "--version" would start one column to the left.
-        if len(action.option_strings) == 1 and action.option_strings[0].startswith("--"):
-            return "    " + super()._format_action_invocation(action)
+        if sys.version_info < (3, 14) and action.option_strings and action.nargs != 0:
+            # Before Python 3.14, argparse repeats the metavar for each option
+            # string ("-e <EXPIRATION>, --expiration <EXPIRATION>") instead of
+            # the newer "-e, --expiration <EXPIRATION>" style. Keep the output
+            # consistent across Python versions by using the newer format here.
+            # This can be removed once Python <3.14 is no longer supported.
+            default_metavar = self._get_default_metavar_for_optional(action)
+            metavar = self._format_args(action, default_metavar=default_metavar)
+            invocation = ", ".join(action.option_strings) + " " + metavar
+            return invocation
+
         return super()._format_action_invocation(action)
 
     def _format_action(self, action: argparse.Action) -> str:

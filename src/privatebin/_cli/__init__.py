@@ -23,7 +23,11 @@ class PrivateBinArgumentParser(argparse.ArgumentParser):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__(formatter_class=ClapLikeHelpFormatter, add_help=False, **kwargs)
+        super().__init__(
+            formatter_class=ClapLikeHelpFormatter,
+            add_help=False,
+            **kwargs,
+        )
         self.add_argument("-h", "--help", action="help", help="Print help")
 
     @classmethod
@@ -40,7 +44,17 @@ class PrivateBinArgumentParser(argparse.ArgumentParser):
             version=f"%(prog)s {__version__}",
             help="Print version",
         )
-        subparsers = parser.add_subparsers(dest="command", required=True, title="commands")
+        subparsers = parser.add_subparsers(
+            title="commands",
+            dest="command",
+            required=True,
+            # On Python <3.14, argparse inherits the parent's full usage
+            # string here, resulting in:
+            # "privatebin [-h] [--version] [create | get | delete] ... create [-h] ..."
+            # Passing "privatebin" explicitly gives us the shorter:
+            # "privatebin create [-h] ..."
+            prog="privatebin",
+        )
 
         _create.register(
             subparsers.add_parser(
