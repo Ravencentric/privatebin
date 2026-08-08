@@ -6,8 +6,7 @@ import sys
 from pathlib import Path
 
 import privatebin
-from privatebin import Attachment, Expiration, Feature, Formatter
-from privatebin._cli._common import suppress_traceback
+from privatebin import Expiration, Feature, Formatter
 
 EXPIRATIONS = tuple(member.value for member in Expiration)
 FORMATTERS = {
@@ -71,26 +70,31 @@ def register(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("text", nargs="?", default=None, help="The text content of the paste")
 
 
-@suppress_traceback
 def run(args: argparse.Namespace) -> int:
-    attachments = (
-        tuple(Attachment.from_file(file) for file in args.attachment) if args.attachment else None
-    )
-    text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
+    try:
+        attachments = (
+            tuple(privatebin.Attachment.from_file(file) for file in args.attachment)
+            if args.attachment
+            else None
+        )
+        text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
-    receipt = privatebin.create(
-        text=text.strip(),
-        server=args.server,
-        attachments=attachments,
-        password=args.password,
-        feature=Feature.BURN_AFTER_READING if args.burn else None,
-        expiration=Expiration(args.expiration),
-        formatter=FORMATTERS[args.formatter],
-    )
+        receipt = privatebin.create(
+            text=text.strip(),
+            server=args.server,
+            attachments=attachments,
+            password=args.password,
+            feature=Feature.BURN_AFTER_READING if args.burn else None,
+            expiration=Expiration(args.expiration),
+            formatter=FORMATTERS[args.formatter],
+        )
 
-    if args.json:
-        print(receipt.to_json())
-    else:
-        print(receipt.url.unmask())
+        if args.json:
+            print(receipt.to_json())
+        else:
+            print(receipt.url.unmask())
 
-    return 0
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1

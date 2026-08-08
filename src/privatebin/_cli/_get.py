@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING
 
 import privatebin
-from privatebin._cli._common import suppress_traceback
 
 if TYPE_CHECKING:
     import argparse
@@ -18,13 +18,19 @@ def register(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-p", "--password", help="Password for password-protected pastes")
 
 
-@suppress_traceback
 def run(args: argparse.Namespace) -> int:
-    paste = privatebin.get(args.url.strip(), password=args.password)  # pyrefly: ignore[unknown-argument-type]
+    try:
+        paste = privatebin.get(
+            args.url.strip(),  # pyrefly: ignore[unknown-argument-type]
+            password=args.password,
+        )
 
-    if args.json:
-        print(paste.to_json())
-    else:
-        print(paste.text)
+        if args.json:
+            print(paste.to_json())
+        else:
+            print(paste.text)
 
-    return 0
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
