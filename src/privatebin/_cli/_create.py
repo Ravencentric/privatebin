@@ -1,103 +1,100 @@
 from __future__ import annotations
 
+import argparse
+import os
 import sys
-from typing import Annotated, Literal
-
-import rich
-from cyclopts import App, Parameter
-from cyclopts.types import ResolvedExistingFile
+from pathlib import Path
 
 import privatebin
-from privatebin import Attachment, Expiration, Feature, Formatter
+from privatebin import Expiration, Feature, Formatter
 
-create_app = App(
-    "create",
-    help="Create a new paste on PrivateBin.",
-)
+EXPIRATIONS = tuple(member.value for member in Expiration)
+FORMATTERS = {
+    "text": Formatter.PLAIN_TEXT,
+    "markdown": Formatter.MARKDOWN,
+    "code": Formatter.SOURCE_CODE,
+}
 
 
-@create_app.default
-def create(
-    text: str | None = None,
-    /,
-    *,
-    server: Annotated[
-        str, Parameter(name=["--server", "-s"], env_var="PRIVATEBIN_SERVER")
-    ] = "https://privatebin.net/",
-    attachments: Annotated[
-        list[ResolvedExistingFile] | None, Parameter(name=["--attachment", "-a"])
-    ] = None,
-    password: Annotated[str | None, Parameter(name=["--password", "-p"])] = None,
-    burn: bool = False,
-    expiration: Annotated[
-        Literal["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"],
-        Parameter(name=["--expiration", "-e"]),
-    ] = "1week",
-    formatter: Annotated[
-        Literal["text", "markdown", "code"], Parameter(name=["--formatter", "-f"])
-    ] = "text",
-    json: bool = False,
-    pretty: bool = False,
-) -> int:
-    """
-    Create a new paste on PrivateBin.
+def existing_file(value: str) -> Path:
+    """Argparse type: resolve the path and reject non-existent files."""
+    path = Path(value).expanduser().resolve()
+    if not path.is_file():
+        raise argparse.ArgumentTypeError(f"'{value}' is not an existing file")
+    return path
 
-    Parameters
-    ----------
-    text : str, optional
-        The text content of the paste.
-    server : str, optional
-        The base URL of the PrivateBin instance to use.
-    attachments : list[ResolvedExistingFile], optional
-        Attachments to include with the paste.
-    password : str, optional
-        A password to encrypt the paste with an additional layer of security.
-    burn : bool, optional
-        If set, the paste will be automatically deleted after the first view.
-    expiration : Literal["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"], optional
-        The desired expiration time for the paste.
-    formatter : Literal["text", "markdown", "code"], optional
-        The formatting option for the paste content.
-    json : bool, optional
-        Output paste data in JSON format.
-    pretty : bool, optional
-        Pretty-print JSON output.
 
-    """
+def register(parser: argparse.ArgumentParser) -> None:
+    """Register the 'create' subcommand's arguments."""
+    parser.add_argument(
+        "-a",
+        "--attachment",
+        action="append",
+        type=existing_file,
+        help="Attachments to include with the paste (repeatable)",
+    )
+    parser.add_argument(
+        "-b",
+        "--burn",
+        action="store_true",
+        help="If set, the paste will be automatically deleted after the first view",
+    )
+    parser.add_argument(
+        "-e",
+        "--expiration",
+        choices=EXPIRATIONS,
+        default="1day",
+        help="The desired expiration time for the paste (%(choices)s)",
+    )
+    parser.add_argument(
+        "-f",
+        "--formatter",
+        choices=FORMATTERS.keys(),
+        default="text",
+        help="The formatting option for the paste content (%(choices)s)",
+    )
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output paste data in JSON format"
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        help="A password to encrypt the paste with an additional layer of security",
+    )
+    parser.add_argument(
+        "-s",
+        "--server",
+        default=os.environ.get("PRIVATEBIN_SERVER", "https://privatebin.net/"),
+        help="The base URL of the PrivateBin instance to use",
+    )
+    parser.add_argument("text", nargs="?", default=None, help="The text content of the paste")
+
+
+def run(args: argparse.Namespace) -> int:
     try:
-        _attachments = (
-            tuple(Attachment.from_file(file) for file in attachments) if attachments else None
+        attachments = (
+            tuple(privatebin.Attachment.from_file(file) for file in args.attachment)
+            if args.attachment
+            else None
         )
+        text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
-        if text is None:
-            text = sys.stdin.buffer.read().decode(encoding="utf-8")
-
-        _formatter_map = {
-            "text": Formatter.PLAIN_TEXT,
-            "markdown": Formatter.MARKDOWN,
-            "code": Formatter.SOURCE_CODE,
-        }
-
-        paste = privatebin.create(
+        receipt = privatebin.create(
             text=text.strip(),
-            server=server,
-            attachments=_attachments,
-            password=password,
-            feature=Feature.BURN_AFTER_READING if burn else None,
-            expiration=Expiration(expiration),
-            formatter=_formatter_map[formatter],
+            server=args.server,
+            attachments=attachments,
+            password=args.password,
+            feature=Feature.BURN_AFTER_READING if args.burn else None,
+            expiration=Expiration(args.expiration),
+            formatter=FORMATTERS[args.formatter],
         )
 
-        if json:
-            if pretty:
-                rich.print_json(paste.to_json())
-            else:
-                print(paste.to_json())
+        if args.json:
+            print(receipt.to_json())
         else:
-            print(paste.url.unmask())
+            print(receipt.url.unmask())
 
         return 0
-
     except Exception as e:
-        rich.print(f"[red]Error:[/] {e}")
+        print(f"Error: {e}", file=sys.stderr)
         return 1
