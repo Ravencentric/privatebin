@@ -22,4 +22,4 @@ def test_unknown_attribute_raises() -> None:
 
 
 def test_dir_matches_all() -> None:
-    assert dir(privatebin) == sorted(privatebin.__all__) == privatebin.__all__
+    assert dir(privatebin) == sorted(privatebin.__all__) == list(privatebin.__all__)
