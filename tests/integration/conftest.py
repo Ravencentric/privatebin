@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING, Literal
 
-import httpx
+import httpx2
 import pytest
 
 from privatebin import PrivateBin
@@ -33,7 +33,7 @@ def server() -> Iterator[str]:
     )
     subprocess.run((*args, "up", "-d", "--wait"), check=True)
     server = "http://127.0.0.1:57391/"
-    assert httpx.get(server).status_code == 200, "PrivateBin instance is unhealthy."
+    assert httpx2.get(server).status_code == 200, "PrivateBin instance is unhealthy."
     try:
         yield server
     finally:

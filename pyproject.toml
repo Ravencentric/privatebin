@@ -18,9 +18,9 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "cryptography>=44.0.2",
-  "httpx>=0.28.1",
-  "msgspec>=0.21.1",
+  "cryptography>=50",
+  "httpx2>=2.10",
+  "msgspec>=0.21",
 ]
 
 [project.urls]
@@ -33,29 +33,31 @@ privatebin = "privatebin.__main__:main"
 [dependency-groups]
 dev = [
   { include-group = "docs" },
-  { include-group = "lint" },
+  { include-group = "check" },
   { include-group = "test" },
 ]
 docs = [
   "mkdocstrings[python]>=1",
-  "zensical>=0.0.52",
+  "zensical>=0.0.54",
 ]
-lint = [
-  "httpx>=0.28.1",
-  "httpx2>=2.9.1",
-  "niquests>=3.20.1",
+check = [
   "pyrefly>=1.1.1",
-  "requests>=2.32.5",
   "ruff>=0.16.0",
-  "types-requests>=2.33.0.20260712",
-  "typing-extensions>=4.14.1",
+  "typing-extensions>=4.16",
+  { include-group = "types"}
 ]
 test = [
-  "coverage[toml]>=7.6.12",
-  "hypothesis>=6.130",
-  "pytest>=9",
-  "pytest-socket>=0.7.0",
-  "tomli>=2.2.1",
+  "coverage[toml]>=7.15",
+  "hypothesis>=6.165",
+  "pytest>=9.1",
+  "pytest-socket>=0.8",
+  "tomli>=2.4",
+]
+types = [
+  "httpx>=0.28",
+  "niquests>=3.20",
+  "requests>=2.34",
+  "types-requests>=2.33.0.20260712",
 ]
 
 [build-system]
@@ -84,9 +86,9 @@ unused-call-result = false
 addopts = ["--disable-socket", "--allow-hosts=127.0.0.1", "--showlocals", "-ra"]
 filterwarnings = ["error"]
 log_cli_level = "INFO"
+markers = ["integration: Requires a PrivateBin test instance running on localhost"]
 strict = true
 testpaths = ["tests"]
-markers = ["integration: Requires a PrivateBin test instance running on localhost"]
 
 [tool.ruff]
 line-length = 99

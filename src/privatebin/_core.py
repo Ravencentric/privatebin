@@ -7,7 +7,7 @@ from types import NoneType
 from typing import TYPE_CHECKING, Any
 
 import cryptography.exceptions
-import httpx
+import httpx2
 
 from privatebin._base58 import b58decode, b58encode
 from privatebin._crypto import decrypt, encrypt
@@ -53,7 +53,7 @@ class PrivateBin:
             The base URL of the PrivateBin server.
         client : HttpClientProtocol | None, optional
             An existing HTTP client instance to be used for requests.
-            If `None`, a new `httpx.Client` is created.
+            If `None`, a new `httpx2.Client` is created.
 
         Examples
         --------
@@ -69,7 +69,7 @@ class PrivateBin:
         assert_type(server, str, param="server")
         self._server = server
         self._client = (
-            httpx.Client(
+            httpx2.Client(
                 headers={
                     "User-Agent": f"privatebin/{__version__} (https://pypi.org/project/privatebin/)"
                 }
