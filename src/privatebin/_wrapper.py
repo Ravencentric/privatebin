@@ -38,7 +38,7 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
     ```python
     import privatebin
 
-    paste = privatebin.get("https://privatebin.net/?pasteid#passphrase")
+    paste = privatebin.get("https://myprivatebin.example.org/?pasteid#passphrase")
     print(paste.text)
     ```
 
@@ -47,7 +47,9 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
     ```python
     import privatebin
 
-    paste = privatebin.get("https://privatebin.net/?pasteid#passphrase", password="secret")
+    paste = privatebin.get(
+        "https://myprivatebin.example.org/?pasteid#passphrase", password="secret"
+    )
     print(paste.text)
     ```
 
@@ -60,7 +62,7 @@ def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None)
 def create(
     text: str,
     *,
-    server: str | PrivateBinUrl | PasteReceipt = "https://privatebin.net/",
+    server: str | PrivateBinUrl | PasteReceipt,
     attachments: Attachment | Iterable[Attachment] | None = None,
     password: str | None = None,
     feature: Feature | None = None,
@@ -75,7 +77,7 @@ def create(
     ----------
     text : str
         The text content of the paste.
-    server : str | PrivateBinUrl | PasteReceipt, optional
+    server : str | PrivateBinUrl | PasteReceipt
         The base URL of the PrivateBin instance to use.
     attachments : Attachment | Iterable[Attachment], optional
         An attachment or iterable of attachments to include with the paste.
@@ -106,10 +108,10 @@ def create(
 
     Examples
     --------
-    Create a simple paste on the default PrivateBin instance:
+    Create a simple paste on a PrivateBin server:
 
     ```python
-    paste = privatebin.create("Hello, PrivateBin!")
+    paste = privatebin.create("Hello, PrivateBin!", server="https://myprivatebin.example.org/")
     print(f"Paste URL: {paste.url}")
     ```
 
@@ -194,7 +196,9 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
     ```python
     import privatebin
 
-    paste = privatebin.create(text="This paste will be deleted.")
+    paste = privatebin.create(
+        text="This paste will be deleted.", server="https://myprivatebin.example.org/"
+    )
     privatebin.delete(paste, delete_token=paste.delete_token)
     print(f"Paste with URL '{paste.url}' deleted.")
     ```

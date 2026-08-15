@@ -41,7 +41,7 @@ Options:
   -f, --formatter <FORMATTER>    The formatting option for the paste content (text, markdown, code)
   -j, --json                     Output paste data in JSON format
   -p, --password <PASSWORD>      A password to encrypt the paste with an additional layer of security
-  -s, --server <SERVER>          The base URL of the PrivateBin instance to use
+  -s, --server <SERVER>          The base URL of the PrivateBin instance to use (env: PRIVATEBIN_SERVER) (default: https://privatebin.net/)
 """
 
 GET_HELP = """\
@@ -69,7 +69,11 @@ Options:
 
 
 @pytest.fixture(autouse=True)
-def fixed_terminal_width(monkeypatch: pytest.MonkeyPatch) -> None:
+def prepare(monkeypatch: pytest.MonkeyPatch) -> None:
+    # PRIVATEBIN_SERVER can change the help outout
+    monkeypatch.delenv("PRIVATEBIN_SERVER", raising=False)
+
+    # Avoid line wrap
     monkeypatch.setattr(
         shutil,
         shutil.get_terminal_size.__name__,

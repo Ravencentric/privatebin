@@ -25,13 +25,19 @@ def test_wrapper_get_errors() -> None:
 
 def test_wrapper_create_errors() -> None:
     with pytest.raises(TypeError, match="Parameter 'text' expected 'str', but got 'object'."):
-        privatebin.create(object())  # pyrefly: ignore[bad-argument-type]
+        privatebin.create(
+            object(),  # pyrefly: ignore[bad-argument-type]
+            server="https://example.com/",
+        )
 
     with pytest.raises(
         TypeError,
         match="Parameter 'server' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'NoneType'.",
     ):
-        privatebin.create("hello", server=None)  # pyrefly: ignore[bad-argument-type]
+        privatebin.create(
+            "hello",
+            server=None,  # pyrefly: ignore[bad-argument-type]
+        )
 
 
 def test_wrapper_delete_errors() -> None:
@@ -39,8 +45,10 @@ def test_wrapper_delete_errors() -> None:
         TypeError,
         match="Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got 'object'.",
     ):
-        privatebin.delete(url=object(), delete_token="hello")  # pyrefly: ignore[bad-argument-type]
-
+        privatebin.delete(
+            url=object(),  # pyrefly: ignore[bad-argument-type]
+            delete_token="hello",
+        )
     with pytest.raises(
         ValueError,
         match=re.escape(

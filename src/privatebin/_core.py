@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 class PrivateBin:
     def __init__(
         self,
-        server: str = "https://privatebin.net/",
+        server: str,
         *,
         client: HttpClientProtocol | None = None,
     ) -> None:
@@ -49,7 +49,7 @@ class PrivateBin:
 
         Parameters
         ----------
-        server : str, optional
+        server : str
             The base URL of the PrivateBin server.
         client : HttpClientProtocol | None, optional
             An existing HTTP client instance to be used for requests.
@@ -60,7 +60,7 @@ class PrivateBin:
         Basic usage to instantiate a PrivateBin client:
 
         ```python
-        with PrivateBin() as client:
+        with PrivateBin("https://myprivatebin.example.org/") as client:
             paste = client.get(id="pasteid", passphrase="secret")
             print(paste.text)
         ```
@@ -92,9 +92,9 @@ class PrivateBin:
 
         Examples
         --------
-        >>> client = PrivateBin()
+        >>> client = PrivateBin("https://myprivatebin.example.org/")
         >>> client.server
-        'https://privatebin.net/'
+        'https://myprivatebin.example.org/'
 
         """
         return self._server
@@ -127,7 +127,7 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as pb:
+        with PrivateBin("https://myprivatebin.example.org/") as pb:
             paste = pb.get(id="pasteid", passphrase="secret")
             print(paste.text)
             for attachment in paste.attachments:
@@ -256,7 +256,7 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as pb:
+        with PrivateBin("https://myprivatebin.example.org/") as pb:
             paste = pb.create("Hello, PrivateBin!")
             print(f"Paste created at: {paste.url}")
         ```
@@ -266,7 +266,7 @@ class PrivateBin:
         ```python
         from privatebin import Feature, Formatter, PrivateBin
 
-        with PrivateBin() as pb:
+        with PrivateBin("https://myprivatebin.example.org/") as pb:
             paste = pb.create(
                 text="This *is* **markdown** formatted text.",
                 formatter=Formatter.MARKDOWN,
@@ -280,7 +280,7 @@ class PrivateBin:
         ```python
         from privatebin import Attachment, PrivateBin
 
-        with PrivateBin() as pb:
+        with PrivateBin("https://myprivatebin.example.org/") as pb:
             attachment = Attachment.from_file("path/to/your/file.txt")
             paste = pb.create(
                 text="This paste has a password and an attachment.",
@@ -402,7 +402,7 @@ class PrivateBin:
         ```python
         from privatebin import PrivateBin
 
-        with PrivateBin() as pb:
+        with PrivateBin("https://myprivatebin.example.org/") as pb:
             paste = pb.create(text="This paste will be deleted.")
             print(f"Paste URL: {paste.url}")
             pb.delete(id=paste.url.id, delete_token=paste.delete_token)

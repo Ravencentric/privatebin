@@ -65,7 +65,7 @@ def register(parser: argparse.ArgumentParser) -> None:
         "-s",
         "--server",
         default=os.environ.get("PRIVATEBIN_SERVER", "https://privatebin.net/"),
-        help="The base URL of the PrivateBin instance to use",
+        help="The base URL of the PrivateBin instance to use (env: PRIVATEBIN_SERVER) (default: %(default)s)",
     )
     parser.add_argument("text", nargs="?", default=None, help="The text content of the paste")
 
