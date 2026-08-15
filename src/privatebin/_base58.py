@@ -6,7 +6,7 @@ from typing import Final
 # Ref: <https://github.com/PrivateBin/PrivateBin/blob/0e81e5a4e8546b30e9d8736e5bff1506e9530130/js/privatebin.js#L986>
 BASE58_ALPHABET: Final = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 FIRST_CHAR: Final = BASE58_ALPHABET[0]
-NULL = b"\x00"
+NULL_BYTE: Final = b"\x00"
 
 
 # Ref: <https://github.com/PrivateBin/PrivateBin/blob/0e81e5a4e8546b30e9d8736e5bff1506e9530130/js/base-x-5.0.1.js#L24>
@@ -23,7 +23,7 @@ def b58encode(raw: bytes, /) -> str:
 
     # Map leading zero bytes to FIRST_CHAR
     # Ref: <https://github.com/PrivateBin/PrivateBin/blob/0e81e5a4e8546b30e9d8736e5bff1506e9530130/js/base-x-5.0.1.js#L65>
-    leading_zero_bytes = len(raw) - len(raw.lstrip(NULL))
+    leading_zero_bytes = len(raw) - len(raw.lstrip(NULL_BYTE))
     return FIRST_CHAR * leading_zero_bytes + "".join(digits)
 
 
@@ -44,4 +44,4 @@ def b58decode(encoded: str, /) -> bytes:
     # Ref: <https://github.com/PrivateBin/PrivateBin/blob/0e81e5a4e8546b30e9d8736e5bff1506e9530130/js/base-x-5.0.1.js#L73-L79>
     # Ref: <https://github.com/PrivateBin/PrivateBin/blob/0e81e5a4e8546b30e9d8736e5bff1506e9530130/js/base-x-5.0.1.js#L108>
     leading_zero_bytes = len(encoded) - len(encoded.lstrip(FIRST_CHAR))
-    return NULL * leading_zero_bytes + decoded
+    return NULL_BYTE * leading_zero_bytes + decoded
