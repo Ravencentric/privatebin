@@ -8,6 +8,7 @@ from pathlib import Path
 import privatebin
 from privatebin import Expiration, Feature, Formatter
 
+SERVER = "https://privatebin.net/"
 EXPIRATIONS = tuple(member.value for member in Expiration)
 FORMATTERS = {
     "text": Formatter.PLAIN_TEXT,
@@ -31,6 +32,7 @@ def register(parser: argparse.ArgumentParser) -> None:
         "--attachment",
         action="append",
         type=existing_file,
+        default=[],
         help="Attachments to include with the paste (repeatable)",
     )
     parser.add_argument(
@@ -64,19 +66,44 @@ def register(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-s",
         "--server",
-        default=os.environ.get("PRIVATEBIN_SERVER", "https://privatebin.net/"),
+        default=os.environ.get("PRIVATEBIN_SERVER", SERVER),
         help="The base URL of the PrivateBin instance to use (env: PRIVATEBIN_SERVER) (default: %(default)s)",
     )
     parser.add_argument("text", nargs="?", default=None, help="The text content of the paste")
 
 
+def ensure_default_instance_supports(server: str, expiration: Expiration) -> None:
+    """
+    PrivateBin doesn't reject invalid expirations, it just uses the
+    instance's default expiration upon encountering an unsupported expiration.
+    Can't do much about arbitrary servers but we do know what the default instance
+    supports so we can error early.
+    """
+    if server.rstrip("/") != SERVER.rstrip("/"):
+        return
+
+    if expiration not in (
+        Expiration.FIVE_MIN,
+        Expiration.TEN_MIN,
+        Expiration.ONE_HOUR,
+        Expiration.ONE_DAY,
+    ):
+        raise ValueError(
+            f"\nThe default PrivateBin instance ({SERVER}) only supports "
+            "expirations of up to 1 day.\n"
+            "Use -s/--server to select a PrivateBin instance whose limits "
+            "meet your preferences."
+        )
+
+
 def run(args: argparse.Namespace) -> int:
     try:
-        attachments = (
-            tuple(privatebin.Attachment.from_file(file) for file in args.attachment)
-            if args.attachment
-            else None
+        ensure_default_instance_supports(
+            server=args.server,
+            expiration=Expiration(args.expiration),
         )
+
+        attachments = tuple(privatebin.Attachment.from_file(file) for file in args.attachment)
         text = args.text if args.text is not None else sys.stdin.buffer.read().decode()
 
         receipt = privatebin.create(
