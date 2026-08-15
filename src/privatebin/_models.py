@@ -275,7 +275,7 @@ class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
     {
     "status": 0,
     "id": "4e7cea11af458924",
-    "url": "/?4e7cea11af458924?4e7cea11af458924",
+    "url": "/?4e7cea11af458924",
     "adata": [
         [
         "GEEM/99wIW5yItxLXOCRAQ==",  # <--- Base64 encoded initialization vector
@@ -550,7 +550,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         --------
         >>> url = PrivateBinUrl(server="https://example.privatebin.com/", id="pasteid", passphrase="secret")
         >>> print(url)  # Implicit string conversion - masked URL
-        'https://example.privatebin.com/?pasteid#********'
+        https://example.privatebin.com/?pasteid#********
         >>> f"{url}"  # Implicit string conversion in f-string - masked URL
         'https://example.privatebin.com/?pasteid#********'
         >>> url.unmask()

@@ -9,7 +9,7 @@ from ._enums import Compression
 
 
 class Compressor:
-    """PrivateBin API compatibile compressor."""
+    """PrivateBin API compatible compressor."""
 
     def __init__(self, *, mode: Compression) -> None:
         self.mode = mode
