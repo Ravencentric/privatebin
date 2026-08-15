@@ -115,7 +115,7 @@ def create(
     print(f"Paste URL: {paste.url}")
     ```
 
-    Create a paste on a custom PrivateBin server with Markdown formatting and burn-after-reading:
+    Create a paste with Markdown formatting and burn-after-reading:
 
     ```python
     import privatebin
@@ -140,6 +140,7 @@ def create(
 
     paste = privatebin.create(
         text="This paste has a password and an attachment.",
+        server="https://myprivatebin.example.org/",
         password="supersecret",
         attachments=attachment
     )

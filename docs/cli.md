@@ -5,6 +5,12 @@
 
 ## Create a paste
 
+By default, pastes are created on `https://privatebin.net/`. Use the `-s`/`--server` flag to create them on another instance, or set the `PRIVATEBIN_SERVER` environment variable:
+
+```bash
+privatebin create "Your secret text here." --server "https://example.org/"
+```
+
 **Direct text:**
 
 ```bash
