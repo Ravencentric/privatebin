@@ -6,10 +6,10 @@ from collections.abc import Iterable
 from types import NoneType
 from typing import TYPE_CHECKING, Any
 
-import base58
 import cryptography.exceptions
 import httpx
 
+from privatebin._base58 import b58decode, b58encode
 from privatebin._crypto import decrypt, encrypt
 from privatebin._enums import (
     Compression,
@@ -148,7 +148,7 @@ class PrivateBin:
 
         # Passphrase is a base58 encoded string,
         # so we need to decode it.
-        decoded_passphrase = base58.b58decode(cleaned_passphrase)
+        decoded_passphrase = b58decode(cleaned_passphrase)
 
         response = self._client.get(self.server, params=id)
         response.raise_for_status()
@@ -376,7 +376,7 @@ class PrivateBin:
             url=PrivateBinUrl(
                 server=self.server,
                 id=response["id"],
-                passphrase=base58.b58encode(passphrase).decode(),
+                passphrase=b58encode(passphrase),
             ),
             delete_token=response["deletetoken"],
         )
