@@ -4,13 +4,18 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING, Literal
 
+import httpx
 import httpx2
+import niquests
 import pytest
+import requests
 
 from privatebin import PrivateBin
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
+
+    from privatebin._protocols import HttpClientProtocol
 
 
 def get_container_runtime() -> Literal["docker", "podman"]:
@@ -41,6 +46,23 @@ def server() -> Iterator[str]:
 
 
 @pytest.fixture
-def pbin_client(server: str) -> Iterator[PrivateBin]:
-    with PrivateBin(server) as client:
-        yield client
+def client(request: pytest.FixtureRequest) -> HttpClientProtocol:
+    factory: Callable[[], HttpClientProtocol] = getattr(request, "param", httpx2.Client)
+    return factory()
+
+
+@pytest.fixture
+def pbin_client(server: str, client: HttpClientProtocol) -> Iterator[PrivateBin]:
+    with PrivateBin(server, client=client) as pbin:
+        yield pbin
+
+
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
+    if "client" not in metafunc.fixturenames:
+        return
+    if not metafunc.config.getoption("--all-http-clients"):
+        return
+    clients = (httpx.Client, httpx2.Client, niquests.Session, requests.Session)
+    metafunc.parametrize(
+        "client", clients, ids=lambda x: f"{x.__module__}.{x.__name__}", indirect=True
+    )

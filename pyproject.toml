@@ -42,11 +42,17 @@ check = [
   "pyrefly>=1.2",
   "ruff>=0.16",
   "typing-extensions>=4.16",
-  { include-group = "types" },
+  { include-group = "http-clients" },
 ]
 docs = [
   "mkdocstrings[python]>=1",
   "zensical>=0.0.54",
+]
+http-clients = [
+  "httpx>=0.28",
+  "niquests>=3.20",
+  "requests>=2.34",
+  "types-requests>=2.33.0.20260712",
 ]
 test = [
   "coverage[toml]>=7.15",
@@ -54,12 +60,7 @@ test = [
   "pytest>=9.1",
   "pytest-socket>=0.8",
   "tomli>=2.4",
-]
-types = [
-  "httpx>=0.28",
-  "niquests>=3.20",
-  "requests>=2.34",
-  "types-requests>=2.33.0.20260712",
+  { include-group = "http-clients" },
 ]
 
 [build-system]

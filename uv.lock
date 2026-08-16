@@ -1154,17 +1154,21 @@ docs = [
     { name = "mkdocstrings", extra = ["python"] },
     { name = "zensical" },
 ]
-test = [
-    { name = "coverage", extra = ["toml"] },
-    { name = "hypothesis" },
-    { name = "pytest" },
-    { name = "pytest-socket" },
-    { name = "tomli" },
-]
-types = [
+http-clients = [
     { name = "httpx" },
     { name = "niquests" },
     { name = "requests" },
+    { name = "types-requests" },
+]
+test = [
+    { name = "coverage", extra = ["toml"] },
+    { name = "httpx" },
+    { name = "hypothesis" },
+    { name = "niquests" },
+    { name = "pytest" },
+    { name = "pytest-socket" },
+    { name = "requests" },
+    { name = "tomli" },
     { name = "types-requests" },
 ]
 
@@ -1205,17 +1209,21 @@ docs = [
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1" },
     { name = "zensical", specifier = ">=0.0.54" },
 ]
-test = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.15" },
-    { name = "hypothesis", specifier = ">=6.165" },
-    { name = "pytest", specifier = ">=9.1" },
-    { name = "pytest-socket", specifier = ">=0.8" },
-    { name = "tomli", specifier = ">=2.4" },
-]
-types = [
+http-clients = [
     { name = "httpx", specifier = ">=0.28" },
     { name = "niquests", specifier = ">=3.20" },
     { name = "requests", specifier = ">=2.34" },
+    { name = "types-requests", specifier = ">=2.33.0.20260712" },
+]
+test = [
+    { name = "coverage", extras = ["toml"], specifier = ">=7.15" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "hypothesis", specifier = ">=6.165" },
+    { name = "niquests", specifier = ">=3.20" },
+    { name = "pytest", specifier = ">=9.1" },
+    { name = "pytest-socket", specifier = ">=0.8" },
+    { name = "requests", specifier = ">=2.34" },
+    { name = "tomli", specifier = ">=2.4" },
     { name = "types-requests", specifier = ">=2.33.0.20260712" },
 ]
 

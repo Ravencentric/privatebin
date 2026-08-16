@@ -64,7 +64,7 @@ jobs:
 
       - name: Run tests and generate coverage
         run: |
-          uv run coverage run -m pytest --run-integration -vv
+          uv run coverage run -m pytest --integration -vv
           uv run coverage xml
 
       - name: Upload coverage artifact
