@@ -12,4 +12,4 @@ services:
       - "/run:nodev,exec,mode=1777"
       - "/srv/data:nodev,noexec,mode=1777"
     ports:
-      - "127.0.0.1:57391:8080"
+      - "${PORT:-59483}:8080"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from typing import TYPE_CHECKING, Literal
@@ -28,21 +29,25 @@ def get_container_runtime() -> Literal["docker", "podman"]:
 
 
 @pytest.fixture(scope="session")
-def server() -> Iterator[str]:
+def server(request: pytest.FixtureRequest) -> Iterator[str]:
     runtime = get_container_runtime()
+    port = request.config.getoption("--port")
+    env = {**os.environ, "PORT": str(port)}
     args = (
         runtime,
         "compose",
         "-f",
         "./docker/compose.yaml",
     )
-    subprocess.run((*args, "up", "-d", "--wait"), check=True)
-    server = "http://127.0.0.1:57391/"
+    subprocess.run((*args, "up", "-d", "--wait"), env=env, check=True)
+
+    server = f"http://127.0.0.1:{port}/"
     assert httpx2.get(server).status_code == 200, "PrivateBin instance is unhealthy."
+
     try:
         yield server
     finally:
-        subprocess.run((*args, "down", "--volumes"), check=False)
+        subprocess.run((*args, "down", "--volumes"), env=env, check=False)
 
 
 @pytest.fixture

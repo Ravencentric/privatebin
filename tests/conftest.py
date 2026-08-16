@@ -22,6 +22,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Run integration tests parametrized over all supported HTTP clients",
     )
+    parser.addoption(
+        "--port",
+        type=int,
+        default=59483,
+        help="Port on localhost for the PrivateBin test instance (default: 59483)",
+    )
 
 
 def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
