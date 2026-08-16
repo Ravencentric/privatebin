@@ -1,6 +1,8 @@
 name: Tests
 
 on:
+  schedule:
+    - cron: "0 5 1 * *"
   push:
     branches:
       - main
@@ -64,7 +66,7 @@ jobs:
 
       - name: Run tests and generate coverage
         run: |
-          uv run coverage run -m pytest --integration -vv
+          uv run coverage run -m pytest --integration --all-http-clients -vv
           uv run coverage xml
 
       - name: Upload coverage artifact
