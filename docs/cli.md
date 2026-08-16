@@ -1,11 +1,15 @@
+# Command Line Interface
+
 !!! note
-    This page provides basic examples for using the `privatebin` command-line tool. 
-    For detailed information and options, please refer to the `--help` flag 
+    This page provides basic examples for using the `privatebin` command-line tool.
+    For detailed information and options, please refer to the `--help` flag
     available with each command (e.g., `privatebin create --help`).
 
 ## Create a paste
 
-By default, pastes are created on `https://privatebin.net/`. Use the `-s`/`--server` flag to create them on another instance, or set the `PRIVATEBIN_SERVER` environment variable:
+By default, pastes are created on `https://privatebin.net/`. Use the `-s`/`--server`
+flag to create them on another instance, or set the `PRIVATEBIN_SERVER` environment
+variable:
 
 ```bash
 privatebin create "Your secret text here." --server "https://example.org/"

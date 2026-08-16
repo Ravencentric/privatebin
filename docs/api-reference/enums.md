@@ -10,4 +10,3 @@
 ::: privatebin.Formatter
     options:
       members: true
-
