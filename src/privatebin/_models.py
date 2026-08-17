@@ -10,7 +10,8 @@ import msgspec
 
 from privatebin._enums import Compression, EncryptionSpec, Feature, Formatter
 from privatebin._errors import PrivateBinError
-from privatebin._utils import guess_mime_type, to_compact_jsonb, urljoin
+from privatebin._url import pb_urljoin, pb_urlsplit
+from privatebin._utils import guess_mime_type, to_compact_jsonb
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -557,7 +558,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         'https://example.privatebin.com/?pasteid#secret'
 
         """
-        return urljoin(self.server, self.id, self.passphrase)
+        return pb_urljoin(self.server, self.id, self.passphrase)
 
     def to_json(self) -> str:
         """
@@ -599,28 +600,31 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         match url:
             case str():
                 try:
-                    server, id_passphrase = url.strip().split("?")
-                    id, passphrase = id_passphrase.split("#")
-
-                    # The leading hyphen is a visual cue for "burn-after-reading" pastes.
-                    # This code removes it because it's not part of the actual passphrase
-                    # and would cause decryption to fail. Removing it also ensures that
-                    # pastes with and without the hyphen are treated as identical.
-                    passphrase = passphrase.removeprefix("-")
-
-                    return cls(server=server, id=id, passphrase=passphrase)
-                except ValueError:
+                    server, id, passphrase = pb_urlsplit(url)
+                except ValueError as exc:
                     msg = (
-                        "Invalid PrivateBin URL format. "
-                        "URL should be like: https://examplebin.net/?pasteid#passphrase. "
-                        f"Got: {url!r}"
+                        "Invalid PrivateBin URL: "
+                        f"{exc}. Expected '<server>/?<paste-id>#<passphrase>'. "
+                        f"Got: {url!r}."
                     )
                     raise ValueError(msg) from None
-            case PrivateBinUrl():
-                return cls(server=url.server, id=url.id, passphrase=url.passphrase)
-            case PasteReceipt():
-                url = url.url
-                return cls(server=url.server, id=url.id, passphrase=url.passphrase)
+
+                if passphrase is None:
+                    msg = (
+                        "Invalid PrivateBin URL: missing '#<passphrase>' component. "
+                        "Expected '<server>/?<paste-id>#<passphrase>'. "
+                        f"Got: {url!r}."
+                    )
+                    raise ValueError(msg)
+
+                return cls(server=server, id=id, passphrase=passphrase)
+
+            case PrivateBinUrl(server=server, id=id, passphrase=passphrase):
+                return cls(server=server, id=id, passphrase=passphrase)
+
+            case PasteReceipt(url=PrivateBinUrl(server=server, id=id, passphrase=passphrase)):
+                return cls(server=server, id=id, passphrase=passphrase)
+
             case _:
                 msg = f"Parameter 'url' expected 'str', 'PrivateBinUrl', or 'PasteReceipt', but got {type(url).__name__!r}."
                 raise TypeError(msg)
@@ -638,7 +642,7 @@ class PrivateBinUrl(JsonStruct, frozen=True, kw_only=True):
         'https://example.com/privatebin/?pasteid#********'
 
         """
-        return urljoin(self.server, self.id, "********")
+        return pb_urljoin(self.server, self.id, "********")
 
     def __repr__(self) -> str:
         """

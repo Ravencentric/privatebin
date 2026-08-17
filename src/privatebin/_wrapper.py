@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from urllib.parse import urlparse
 
 from privatebin._core import PrivateBin
 from privatebin._enums import Compression, Expiration, Feature, Formatter
 from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
+from privatebin._url import pb_urlsplit
 
 
 def get(url: str | PrivateBinUrl | PasteReceipt, *, password: str | None = None) -> Paste:
@@ -206,12 +206,11 @@ def delete(url: str | PrivateBinUrl | PasteReceipt, *, delete_token: str) -> Non
 
     """
     if isinstance(url, str):
-        parsed = urlparse(url)
-        if not (parsed.scheme and parsed.netloc and parsed.query):
-            msg = "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid."
-            raise ValueError(msg)
-        server = f"{parsed.scheme}://{parsed.netloc}"
-        id = parsed.query
+        try:
+            server, id, _ = pb_urlsplit(url)
+        except ValueError as exc:
+            msg = f"Invalid PrivateBin URL: {exc}. Expected '<server>/?<paste-id>'. Got: {url!r}."
+            raise ValueError(msg) from None
     else:
         url = PrivateBinUrl.parse(url)
         server = url.server

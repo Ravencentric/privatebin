@@ -17,7 +17,8 @@ def test_wrapper_get_errors() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid#passphrase"
+            "Invalid PrivateBin URL: missing scheme or host. "
+            "Expected '<server>/?<paste-id>#<passphrase>'. Got: 'whoops'."
         ),
     ):
         privatebin.get("whoops")
@@ -52,7 +53,8 @@ def test_wrapper_delete_errors() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "Invalid PrivateBin URL format. URL should be like: https://examplebin.net/?pasteid"
+            "Invalid PrivateBin URL: missing scheme or host. "
+            "Expected '<server>/?<paste-id>'. Got: 'whoops'."
         ),
     ):
         privatebin.delete("whoops", delete_token="hello")
