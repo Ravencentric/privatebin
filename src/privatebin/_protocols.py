@@ -33,11 +33,13 @@ class HttpClientProtocol(Protocol):
         They're documented here to provide some insight into that
         contract and why it exists.
 
-        Any object implementing this Protocol *should* be able to function as a
-        client for [`PrivateBin`][privatebin.PrivateBin]. I do test that a few
-        HTTP clients statically satisfy this Protocol, but I only run
-        PrivateBin's actual client tests against the one I depend on
-        (used to be `httpx`, now `httpx2`).
+        Any object implementing this Protocol *should* be able to function
+        as a client for [`PrivateBin`][privatebin.PrivateBin].
+        I test that HTTP clients statically satisfy this Protocol,
+        and I also run PrivateBin's client tests against multiple
+        clients. The specific clients tested are intentionally
+        not documented here, since the goal is to support the interface
+        rather than any particular implementation.
 
         That's also what motivated writing this Protocol in the first place.
         Switching the client type directly from `httpx.Client` to

@@ -55,6 +55,12 @@ class PrivateBin:
             An existing HTTP client instance to be used for requests.
             If `None`, a new `httpx2.Client` is created.
 
+            `httpx2.Client` is an implementation detail and
+            should not be relied upon. The client is
+            only required to implement `HttpClientProtocol`,
+            and the internal HTTP client implementation
+            may change in the future.
+
         Examples
         --------
         Basic usage to instantiate a PrivateBin client:
