@@ -55,3 +55,17 @@ def test_b58decode_rejects_whitespace() -> None:
 def test_b58decode_invalid_character() -> None:
     with pytest.raises(ValueError, match="Non-base58 character"):
         b58decode("0")
+
+
+def test_b58decode_error_includes_character() -> None:
+    with pytest.raises(ValueError, match="Non-base58 character: '0'"):
+        b58decode("0")
+
+    with pytest.raises(ValueError, match="Non-base58 character: ' '"):
+        b58decode("Cn8eVZg ")
+
+    with pytest.raises(ValueError, match="Non-base58 character: 'O'"):
+        b58decode("O")
+
+    with pytest.raises(ValueError, match="Non-base58 character: '0'"):
+        b58decode("0I")

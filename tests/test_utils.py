@@ -44,6 +44,13 @@ def test_to_compact_json() -> None:
     )
 
 
+def test_to_compact_json_unicode() -> None:
+    data = {"paste": "café 🎉 日本語"}
+    encoded = to_compact_jsonb(data)
+    assert encoded == '{"paste":"café 🎉 日本語"}'.encode()
+    assert b"\\u" not in encoded
+
+
 def test_guess_mime_type() -> None:
     assert guess_mime_type("hello.txt") == "text/plain"
     assert guess_mime_type("LICENSE") == "application/octet-stream"

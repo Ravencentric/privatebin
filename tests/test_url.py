@@ -31,6 +31,33 @@ def test_pb_urljoin(server: str, paste_id: str, passphrase: str | None, expected
     assert pb_urljoin(server, paste_id, passphrase) == expected
 
 
+import pytest
+
+
+@pytest.mark.parametrize(
+    ("server", "id", "expected"),
+    [
+        (
+            "https://example.com/",
+            "pasteid",
+            "https://example.com/?pasteid",
+        ),
+        (
+            "https://example.com/privatebin",
+            "pasteid",
+            "https://example.com/privatebin/?pasteid",
+        ),
+        (
+            "https://example.com/privatebin/",
+            "pasteid",
+            "https://example.com/privatebin/?pasteid",
+        ),
+    ],
+)
+def test_pb_urljoin_default_passphrase(server: str, id: str, expected: str) -> None:
+    assert pb_urljoin(server, id) == expected
+
+
 @pytest.mark.parametrize(
     ("url", "expected"),
     [
