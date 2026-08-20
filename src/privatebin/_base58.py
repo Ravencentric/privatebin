@@ -34,7 +34,7 @@ def b58decode(encoded: str, /) -> bytes:
         try:
             value = value * 58 + BASE58_ALPHABET.index(character)
         except ValueError:
-            msg = "Non-base58 character"
+            msg = f"Non-base58 character: {character!r}"
             raise ValueError(msg) from None
 
     byte_length = (value.bit_length() + 7) // 8

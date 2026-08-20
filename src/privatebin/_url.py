@@ -3,7 +3,7 @@ from __future__ import annotations
 from urllib.parse import urlsplit
 
 
-def pb_urljoin(server: str, paste_id: str, passphrase: str | None) -> str:
+def pb_urljoin(server: str, paste_id: str, passphrase: str | None = None) -> str:
     """
     Build a PrivateBin URL string with the given passphrase at the end.
 

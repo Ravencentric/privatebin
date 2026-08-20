@@ -28,6 +28,7 @@ from privatebin._models import (
     PrivateBinUrl,
     RawPasteContent,
 )
+from privatebin._url import pb_urljoin
 from privatebin._utils import Compressor, assert_type, to_compact_jsonb
 from privatebin._version import __version__
 
@@ -160,7 +161,8 @@ class PrivateBin:
         # so we need to decode it.
         decoded_passphrase = b58decode(cleaned_passphrase)
 
-        response = self._client.get(self.server, params=id)
+        url = pb_urljoin(self.server, id)
+        response = self._client.get(url)
         response.raise_for_status()
         paste = PasteJsonLD.from_response(response.json())
         cipher_parameters = paste.adata.cipher_parameters
@@ -196,7 +198,8 @@ class PrivateBin:
                 attachments = ()
 
             case _ as unreachable:
-                raise AssertionError(f"Unexpected PrivateBin paste payload: {unreachable!r}")
+                msg = f"Unexpected PrivateBin paste payload: {unreachable!r}"
+                raise PrivateBinDecryptionError(msg)
 
         return Paste(
             id=paste.id,

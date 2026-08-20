@@ -60,7 +60,7 @@ class HttpClientProtocol(Protocol):
         """HTTP headers that support updating."""
         ...
 
-    def get(self, url: str, *, params: str | None = None) -> ResponseProtocol:
+    def get(self, url: str) -> ResponseProtocol:
         """Send a GET request."""
         ...
 

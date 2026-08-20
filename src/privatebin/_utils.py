@@ -71,6 +71,7 @@ def to_compact_jsonb(obj: object) -> bytes:
         # The default separators add unnecessary whitespace
         # which throws off the decryption later down the line.
         separators=(",", ":"),
+        ensure_ascii=False,
     ).encode()
 
 

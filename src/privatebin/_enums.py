@@ -79,11 +79,12 @@ class EncryptionSpec(IntEnum):
     SALT_SIZE = 8  # Allowed: 8 (According to my own tests.)
     KEY_SIZE = 256  # Allowed: [128, 196, 256] (as per PrivateBin)
     TAG_SIZE = 128  # Allowed: [64, 96, 104, 112, 120, 128] (as per PrivateBin)
+    IV_SIZE = 16  # 128-bit IV for AES-GCM (16 bytes)
 
     @staticmethod
     def initialization_vector() -> bytes:
         """Generate a random initialization vector."""
-        return os.urandom(EncryptionSpec.TAG_SIZE // 8)
+        return os.urandom(EncryptionSpec.IV_SIZE)
 
     @staticmethod
     def passphrase() -> bytes:
