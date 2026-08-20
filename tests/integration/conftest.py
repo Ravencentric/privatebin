@@ -14,7 +14,7 @@ import requests
 from privatebin import PrivateBin
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
 
     from privatebin._protocols import HttpClientProtocol
 
@@ -52,12 +52,12 @@ def server(request: pytest.FixtureRequest) -> Iterator[str]:
 
 @pytest.fixture
 def client(request: pytest.FixtureRequest) -> HttpClientProtocol:
-    factory: Callable[[], HttpClientProtocol] = getattr(request, "param", httpx2.Client)
+    factory = getattr(request, "param", httpx2.Client)
     return factory()
 
 
 @pytest.fixture
-def pbin_client(server: str, client: HttpClientProtocol) -> Iterator[PrivateBin]:
+def pb(server: str, client: HttpClientProtocol) -> Iterator[PrivateBin]:
     with PrivateBin(server, client=client) as pbin:
         yield pbin
 
