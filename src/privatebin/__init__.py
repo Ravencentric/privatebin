@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING, Any, Final
 if TYPE_CHECKING:
     from privatebin._core import PrivateBin
     from privatebin._enums import Compression, Expiration, Feature, Formatter
-    from privatebin._errors import PrivateBinError
+    from privatebin._errors import (
+        PrivateBinDecryptionError,
+        PrivateBinError,
+        PrivateBinServerError,
+    )
     from privatebin._models import Attachment, Paste, PasteReceipt, PrivateBinUrl
     from privatebin._version import __version__
     from privatebin._wrapper import create, delete, get
@@ -20,7 +24,9 @@ __all__: Final = (
     "Paste",
     "PasteReceipt",
     "PrivateBin",
+    "PrivateBinDecryptionError",
     "PrivateBinError",
+    "PrivateBinServerError",
     "PrivateBinUrl",
     "__version__",
     "create",
@@ -44,6 +50,8 @@ def __getattr__(name: str) -> Any:
         "Feature": "privatebin._enums",
         "Formatter": "privatebin._enums",
         "PrivateBinError": "privatebin._errors",
+        "PrivateBinDecryptionError": "privatebin._errors",
+        "PrivateBinServerError": "privatebin._errors",
         "create": "privatebin._wrapper",
         "delete": "privatebin._wrapper",
         "get": "privatebin._wrapper",

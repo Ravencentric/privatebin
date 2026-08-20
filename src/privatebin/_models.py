@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypedDict
 import msgspec
 
 from privatebin._enums import Compression, EncryptionSpec, Feature, Formatter
-from privatebin._errors import PrivateBinError
+from privatebin._errors import PrivateBinServerError
 from privatebin._url import pb_urljoin, pb_urlsplit
 from privatebin._utils import guess_mime_type, to_compact_jsonb
 
@@ -239,7 +239,7 @@ class AuthenticatedData(NamedTuple):
             case (False, True):
                 return Feature.BURN_AFTER_READING
             case (True, True):
-                assert False, (
+                raise AssertionError(
                     "A paste cannot have both 'open_discussion' and 'burn_after_reading' enabled."
                 )
 
@@ -337,18 +337,18 @@ class PasteJsonLD(msgspec.Struct, frozen=True, kw_only=True):
 
         Raises
         ------
-        PrivateBinError
+        PrivateBinServerError
             If the API response status is not `0` (success) or if the API version is not `2`.
 
         """
         if response.get("status") != 0:
             # {"status":1, "message": "[errormessage]"}
             msg = response.get("message", "Failed to retrieve paste.")
-            raise PrivateBinError(msg)
+            raise PrivateBinServerError(msg)
 
         if response.get("v") != 2:
             msg = f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {response.get('v', 'UNKNOWN')}"
-            raise PrivateBinError(msg)
+            raise PrivateBinServerError(msg)
 
         # Possible values:
         # - [] (empty list) - Will not expire

@@ -18,7 +18,7 @@ from privatebin._enums import (
     Feature,
     Formatter,
 )
-from privatebin._errors import PrivateBinError
+from privatebin._errors import PrivateBinDecryptionError, PrivateBinServerError
 from privatebin._models import (
     Attachment,
     AuthenticatedData,
@@ -50,15 +50,17 @@ class PrivateBin:
         Parameters
         ----------
         server : str
-            The base URL of the PrivateBin server.
+            URL of the PrivateBin server.
         client : HttpClientProtocol | None, optional
             An existing HTTP client instance to be used for requests.
-            If `None`, a new `httpx2.Client` is created.
+            If `None`, a new `httpx2.Client` is created. In either case,
+            `PrivateBin` takes ownership of the client and will close it
+            when the `PrivateBin` instance is closed or exits its context
+            manager.
 
-            `httpx2.Client` is an implementation detail and
-            should not be relied upon. The client is
-            only required to implement `HttpClientProtocol`,
-            and the internal HTTP client implementation
+            `httpx2.Client` is an implementation detail and should not be
+            relied upon. The client only needs to implement
+            `HttpClientProtocol`, and the internal HTTP client implementation
             may change in the future.
 
         Examples
@@ -94,7 +96,7 @@ class PrivateBin:
     @property
     def server(self) -> str:
         """
-        Get the base server URL of the PrivateBin instance.
+        URL of the PrivateBin instance.
 
         Examples
         --------
@@ -125,8 +127,10 @@ class PrivateBin:
 
         Raises
         ------
-        PrivateBinError
-            If there is an error retrieving or decrypting the paste from PrivateBin.
+        PrivateBinServerError
+            If the server returns an error for the paste.
+        PrivateBinDecryptionError
+            If the paste cannot be decrypted with the given passphrase or password.
 
         Examples
         --------
@@ -173,33 +177,26 @@ class PrivateBin:
             )
         except cryptography.exceptions.InvalidTag as exc:
             msg = "Failed to decrypt paste. Check the passphrase and password."
-            raise PrivateBinError(msg) from exc
+            raise PrivateBinDecryptionError(msg) from exc
 
         decompressed = Compressor(mode=cipher_parameters.compression).decompress(decrypted)
         finalized: RawPasteContent = json.loads(decompressed)
 
         match finalized:
-            case {
-                "paste": str(text),
-                "attachment": str(url),
-                "attachment_name": str(name),
-            }:
+            case {"paste": str(text), "attachment": str(url), "attachment_name": str(name)}:
                 attachments = (Attachment.from_data_url(url=url, name=name),)
 
-            case {
-                "paste": str(text),
-                "attachment": list(urls),
-                "attachment_name": list(names),
-            }:
+            case {"paste": str(text), "attachment": list(urls), "attachment_name": list(names)}:
                 attachments = tuple(
-                    Attachment.from_data_url(url=url, name=name) for url, name in zip(urls, names)
+                    Attachment.from_data_url(url=url, name=name)
+                    for url, name in zip(urls, names, strict=True)
                 )
 
             case {"paste": str(text)}:
                 attachments = ()
 
             case _ as unreachable:
-                assert False, f"'paste' key can never be missing in {unreachable}"
+                raise AssertionError(f"Unexpected PrivateBin paste payload: {unreachable!r}")
 
         return Paste(
             id=paste.id,
@@ -250,8 +247,8 @@ class PrivateBin:
 
         Raises
         ------
-        PrivateBinError
-            If there is an error during paste creation on PrivateBin.
+        PrivateBinServerError
+            If the server refuses the request.
         TypeError
             If provided 'text' is not a `str`.
 
@@ -304,7 +301,7 @@ class PrivateBin:
         assert_type(formatter, Formatter, param="formatter")
         assert_type(compression, Compression, param="compression")
 
-        data = RawPasteContent(paste=text)
+        data: RawPasteContent = {"paste": text}
 
         match attachments:
             case None:
@@ -376,7 +373,7 @@ class PrivateBin:
 
         if response.get("status") != 0:
             msg = response.get("message", "Failed to create paste.")
-            raise PrivateBinError(msg)
+            raise PrivateBinServerError(msg)
 
         return PasteReceipt(
             url=PrivateBinUrl(
@@ -400,8 +397,8 @@ class PrivateBin:
 
         Raises
         ------
-        PrivateBinError
-            If there is an error deleting the paste on PrivateBin.
+        PrivateBinServerError
+            If the server refuses the request.
 
         Examples
         --------
@@ -429,7 +426,7 @@ class PrivateBin:
 
         if response.get("status") != 0:
             msg = response.get("message", "Failed to delete paste.")
-            raise PrivateBinError(msg)
+            raise PrivateBinServerError(msg)
 
     def close(self) -> None:
         """Close the underlying HTTP client session."""
