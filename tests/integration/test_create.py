@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from privatebin import (
@@ -9,7 +11,7 @@ from privatebin import (
     Feature,
     Formatter,
     PrivateBin,
-    PrivateBinError,
+    PrivateBinServerError,
 )
 
 
@@ -81,7 +83,10 @@ def test_create_burn_after_reading(pbin_client: PrivateBin) -> None:
     paste = pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
     assert paste.text == "burn"
     assert paste.feature is Feature.BURN_AFTER_READING
-    with pytest.raises(PrivateBinError):
+    with pytest.raises(
+        PrivateBinServerError,
+        match=re.escape("Document does not exist, has expired or has been deleted."),
+    ):
         pbin_client.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
 
 
@@ -96,7 +101,10 @@ def test_create_burn_after_reading_with_password(pbin_client: PrivateBin) -> Non
     )
     assert paste.text == "burn secret"
     assert paste.feature is Feature.BURN_AFTER_READING
-    with pytest.raises(PrivateBinError):
+    with pytest.raises(
+        PrivateBinServerError,
+        match=re.escape("Document does not exist, has expired or has been deleted."),
+    ):
         pbin_client.get(
             id=receipt.url.id,
             passphrase=receipt.url.passphrase,

@@ -14,7 +14,7 @@ from privatebin import (
     Feature,
     Formatter,
     Paste,
-    PrivateBinError,
+    PrivateBinServerError,
 )
 from privatebin._models import AuthenticatedData, PasteJsonLD
 
@@ -189,7 +189,7 @@ def test_from_response_parses_full_paste_json_ld_shape() -> None:
 def test_from_response_unsupported_api_version(version: int) -> None:
     response: dict[str, object] = {"status": 0, "v": version}
     with pytest.raises(
-        PrivateBinError,
+        PrivateBinServerError,
         match=re.escape(
             f"Only the v2 API is supported (PrivateBin >= 1.3). Got API version: {version}"
         ),
@@ -197,6 +197,21 @@ def test_from_response_unsupported_api_version(version: int) -> None:
         PasteJsonLD.from_response(response)
 
 
+def test_from_response_no_version() -> None:
+    with pytest.raises(
+        PrivateBinServerError,
+        match=re.escape(
+            "Only the v2 API is supported (PrivateBin >= 1.3). Got API version: UNKNOWN"
+        ),
+    ):
+        PasteJsonLD.from_response({"status": 0})
+
+
 def test_from_response_error() -> None:
-    with pytest.raises(PrivateBinError, match="Something went terribly wrong!"):
+    with pytest.raises(PrivateBinServerError, match="Something went terribly wrong!"):
         PasteJsonLD.from_response({"status": 1, "message": "Something went terribly wrong!"})
+
+
+def test_from_response_error_fallback_message() -> None:
+    with pytest.raises(PrivateBinServerError, match=re.escape("Failed to retrieve paste.")):
+        PasteJsonLD.from_response({"status": 1})
