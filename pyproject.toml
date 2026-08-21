@@ -5,7 +5,7 @@ description = "Python library for interacting with PrivateBin's v2 API (PrivateB
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{ name = "Ravencentric", email = "me@ravencentric.cc" }]
+authors = [{ name = "Ravencentric", email = "me@ravencentri.cc" }]
 keywords = ["paste", "pastebin", "privatebin"]
 classifiers = [
   "Intended Audience :: Developers",
