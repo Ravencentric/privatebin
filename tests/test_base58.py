@@ -4,7 +4,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from privatebin._base58 import BASE58_ALPHABET, b58decode, b58encode
+from privatebin._base58 import ALPHABET, b58decode, b58encode
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ def test_base58_decode_is_inverse_of_encode(raw: bytes) -> None:
     assert b58decode(b58encode(raw)) == raw
 
 
-@given(encoded=st.text(alphabet=BASE58_ALPHABET))
+@given(encoded=st.text(alphabet=ALPHABET))
 @settings(max_examples=1000)
 def test_base58_encode_is_inverse_of_decode(encoded: str) -> None:
     assert b58encode(b58decode(encoded)) == encoded
@@ -38,7 +38,7 @@ def test_base58_encode_is_inverse_of_decode(encoded: str) -> None:
 @given(raw=st.binary())
 @settings(max_examples=1000)
 def test_base58_encoded_only_uses_alphabet(raw: bytes) -> None:
-    assert set(b58encode(raw)) <= set(BASE58_ALPHABET)
+    assert set(b58encode(raw)) <= set(ALPHABET)
 
 
 @given(raw=st.binary(), padding=st.integers(min_value=0, max_value=8))
