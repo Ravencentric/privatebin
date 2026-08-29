@@ -467,7 +467,7 @@ class Attachment(JsonStruct, frozen=True, kw_only=True):
 
         """
         # https://regex101.com/r/Wiu431/1
-        pattern = r"^data:(?P<mimetype>.+);base64,(?P<data>.+)$"
+        pattern = r"^data:(?P<mimetype>.+);base64,(?P<data>.*)$"
         match = re.fullmatch(pattern, url)
 
         if match is None:
@@ -479,7 +479,7 @@ class Attachment(JsonStruct, frozen=True, kw_only=True):
             raise ValueError(msg)
 
         data = match.group("data")
-        content = base64.b64decode(data)
+        content = base64.b64decode(data, validate=True)
 
         return cls(content=content, name=name)
 

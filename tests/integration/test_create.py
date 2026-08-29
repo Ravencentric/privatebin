@@ -34,6 +34,14 @@ def test_create_with_attachment(pb: PrivateBin) -> None:
     assert paste.attachments[0].content == b"foo"
 
 
+def test_create_with_empty_attachment(pb: PrivateBin) -> None:
+    attachment = Attachment(content=b"", name="empty.txt")
+    receipt = pb.create("Hello World!", attachments=attachment)
+    paste = pb.get(id=receipt.url.id, passphrase=receipt.url.passphrase)
+
+    assert paste.attachments == (attachment,)
+
+
 def test_create_with_password(pb: PrivateBin) -> None:
     receipt = pb.create("secret", password="hunter2")
     paste = pb.get(id=receipt.url.id, passphrase=receipt.url.passphrase, password="hunter2")

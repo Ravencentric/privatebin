@@ -68,6 +68,12 @@ def test_attachment_from_b64() -> None:
     assert attachment.to_data_url() == "data:application/octet-stream;base64,Rm9vIGFuZCBiYXI="
 
 
+def test_empty_attachment_data_url_roundtrip() -> None:
+    attachment = Attachment(name="empty.txt", content=b"")
+
+    assert Attachment.from_data_url(url=attachment.to_data_url(), name=attachment.name) == attachment
+
+
 def test_attachment_from_b64_error() -> None:
     original = b"Foo and bar"
     data = base64.b64encode(original).decode()
