@@ -4,7 +4,50 @@ import re
 
 import pytest
 
-from privatebin._url import pb_urljoin, pb_urlsplit
+from privatebin._url import pb_normalize_server_url, pb_urljoin, pb_urlsplit
+
+
+@pytest.mark.parametrize(
+    ("server", "expected"),
+    [
+        ("https://example.com", "https://example.com/"),
+        ("https://example.com/", "https://example.com/"),
+        ("https://example.com/privatebin", "https://example.com/privatebin/"),
+        ("https://example.com/privatebin/", "https://example.com/privatebin/"),
+        ("  https://example.com/  ", "https://example.com/"),
+        ("  https://example.com/privatebin  ", "https://example.com/privatebin/"),
+        ("https://example.com///", "https://example.com/"),
+    ],
+)
+def test_pb_normalize_server_url(server: str, expected: str) -> None:
+    assert pb_normalize_server_url(server) == expected
+
+
+@pytest.mark.parametrize(
+    ("server", "reason"),
+    [
+        ("whoops", "missing scheme or host"),
+        ("", "missing scheme or host"),
+        ("a?b#c", "missing scheme or host"),
+        ("https://example.com/?", "server URL must not contain a query or fragment"),
+        ("https://example.com/#", "server URL must not contain a query or fragment"),
+        (
+            "https://example.com/?pasteid",
+            "server URL must not contain a query or fragment",
+        ),
+        (
+            "https://example.com/#fragment",
+            "server URL must not contain a query or fragment",
+        ),
+        (
+            "https://example.com/privatebin?pasteid",
+            "server URL must not contain a query or fragment",
+        ),
+    ],
+)
+def test_pb_normalize_server_url_errors(server: str, reason: str) -> None:
+    with pytest.raises(ValueError, match=re.escape(reason)):
+        pb_normalize_server_url(server)
 
 
 @pytest.mark.parametrize(
@@ -31,7 +74,23 @@ def test_pb_urljoin(server: str, paste_id: str, passphrase: str | None, expected
     assert pb_urljoin(server, paste_id, passphrase) == expected
 
 
-import pytest
+@pytest.mark.parametrize(
+    ("server", "reason"),
+    [
+        ("whoops", "missing scheme or host"),
+        (
+            "https://example.com/?pasteid",
+            "server URL must not contain a query or fragment",
+        ),
+        (
+            "https://example.com/#fragment",
+            "server URL must not contain a query or fragment",
+        ),
+    ],
+)
+def test_pb_urljoin_invalid_server(server: str, reason: str) -> None:
+    with pytest.raises(ValueError, match=re.escape(reason)):
+        pb_urljoin(server, "pasteid", "secret")
 
 
 @pytest.mark.parametrize(
@@ -102,7 +161,7 @@ def test_pb_urlsplit_roundtrip(url: str, expected: str) -> None:
         ),
         (
             "https://example.com/privatebin?pasteid",
-            ("https://example.com/privatebin", "pasteid", None),
+            ("https://example.com/privatebin/", "pasteid", None),
         ),
         ("https://example.com/?pasteid", ("https://example.com/", "pasteid", None)),
         ("https://example.com/?pasteid#", ("https://example.com/", "pasteid", None)),

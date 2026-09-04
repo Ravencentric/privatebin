@@ -71,7 +71,9 @@ def test_attachment_from_b64() -> None:
 def test_empty_attachment_data_url_roundtrip() -> None:
     attachment = Attachment(name="empty.txt", content=b"")
 
-    assert Attachment.from_data_url(url=attachment.to_data_url(), name=attachment.name) == attachment
+    assert (
+        Attachment.from_data_url(url=attachment.to_data_url(), name=attachment.name) == attachment
+    )
 
 
 def test_attachment_from_b64_error() -> None:

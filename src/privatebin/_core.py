@@ -28,7 +28,7 @@ from privatebin._models import (
     PrivateBinUrl,
     RawPasteContent,
 )
-from privatebin._url import pb_urljoin
+from privatebin._url import pb_normalize_server_url, pb_urljoin
 from privatebin._utils import Compressor, assert_type, to_compact_jsonb
 from privatebin._version import __version__
 
@@ -76,7 +76,7 @@ class PrivateBin:
 
         """
         assert_type(server, str, param="server")
-        self._server = server
+        self._server = pb_normalize_server_url(server)
         self._client = (
             httpx2.Client(
                 headers={
